@@ -113,7 +113,7 @@ class AzureStorageWrapper {
 		})();
 	}
 
-	getImageBuffer(url, harvest_id) {
+	getBase64Image(url, harvest_id) {
 		return (async () => {
 			try {
 				var image = await this.getImageStream(url, harvest_id);

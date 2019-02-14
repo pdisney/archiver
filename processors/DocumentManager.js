@@ -60,9 +60,9 @@ var getImages = async (ocr_data, harvest_id, azureconnector) => {
             var record = ocr_data[i];
             if (!image_url || image_url !== record.url) {
                 image_url = record.url;
-                var image = await azureconnector.getImageBuffer(image_url, harvest_id);
+                var image = await azureconnector.getBase64Image(image_url, harvest_id);
                 if (image) {
-                    images.push({ "url": image_url, "image": image, "timestamp": record.timestamp });
+                    images.push({ "url": image_url, "encoding": "base64", "timestamp": record.timestamp, "image": image });
                 }
             }
         }
@@ -209,7 +209,7 @@ class DocumentManager {
         return (async () => {
 
             this.s3saver.saveDocument(document, global.S3Bucket)
-            
+
         })();
     }
 

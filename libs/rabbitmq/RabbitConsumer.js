@@ -13,7 +13,6 @@ class RabbitConsumer {
 
     constructor(connector, queue, onMessage) {
         return (async () => {
-            console.info("PARAMETERS",queue);
             if(!connector||!queue||!onMessage){
                 console.error("Unable to create RabbitConsumer. Missing Parameter");
                 console.error("Connector", connector);
@@ -56,10 +55,10 @@ class RabbitConsumer {
 
                         var data = JSON.parse(message_payload);
                         if(data.image){
-                            data.image =  new Buffer(data.image);
+                            data.image =   Buffer.from(data.image);
                         }
                         if(data.file){
-                            data.file = new Buffer(data.file);
+                            data.file =  Buffer.from(data.file);
                         }
 
                         var done = async () => {
