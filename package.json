@@ -1,0 +1,38 @@
+{
+  "name": "archiver",
+  "scripts": {
+    "testall": "./node_modules/mocha/bin/mocha  ./tests/*.js",
+    "testAzureWrapper": "./node_modules/mocha/bin/mocha  ./tests/test_AzureStorageWrapper.js",
+    "testUrlDoc": "./node_modules/mocha/bin/mocha  ./tests/test_UrlDocument.js",
+    "testsave": "./node_modules/mocha/bin/mocha  ./tests/unit/test_Saver.js",
+    "testscrape": "./node_modules/mocha/bin/mocha  ./tests/unit/test_Scraper.js",
+    "testscrapedoc": "./node_modules/mocha/bin/mocha  ./tests/unit/test_ScrapeDoc.js",
+    "testfilescraper": "./node_modules/mocha/bin/mocha  ./tests/unit/test_FileScraper.js",
+    "testdownloader": "./node_modules/mocha/bin/mocha  ./tests/unit/test_Downloader.js",
+    "integration": "./node_modules/mocha/bin/mocha  ./tests/integration/*",
+    "testS3":"./node_modules/mocha/bin/mocha  ./tests/test_S3Saver.js",
+    "testwrappers": "./node_modules/mocha/bin/mocha  ./libs/tests/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pdisney/peeker"
+  },
+  "version": "0.0.1",
+  "dependencies": {
+    "amqplib": "*",
+    "azure-storage": "*",
+    "pg": "*",
+    "mocha": "^5.2.0",
+    "chai": "*",
+    "request": "*",
+    "franc": "*",
+    "url": "*",
+    "valid-url": "*",
+    "utf8": "*",
+    "aws-sdk": "*",
+    "cheerio": "*",
+    "raw-body": "*",
+    "winston": "2.4.4"
+  },
+  "analyze": false
+}

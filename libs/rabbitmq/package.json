@@ -1,0 +1,17 @@
+{
+  "name": "rabbitmqwrapper",
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha  ./tests/**/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pdisney/peeker"
+  },
+  "version": "0.0.1",
+  "dependencies": {
+    "amqplib": "*",
+    "mocha": "^5.2.0",
+    "chai": "*"
+  },
+  "analyze": false
+}
