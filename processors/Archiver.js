@@ -18,7 +18,7 @@ var readFile = (path) => {
 }
 var writeFile = (path, data) => {
     return new Promise((resolve, reject) => {
-        console.info("DATA", data);
+     
         fs.writeFile(path, data, (err) => {
             if (err) {
                 console.error(err);
