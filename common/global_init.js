@@ -4,7 +4,7 @@ const loggingInit = require('../libs/winston/loginit');
 
 var globalInit = async () => {
   try {
-    global.config={};
+    global.config = {};
     await loggingInit.loggingInit();
     await appInit();
     await databaseInit();
@@ -18,7 +18,7 @@ var globalInit = async () => {
 
 
 var databaseInit = async () => {
-  global.harvest_dbstring = process.env.HARVEST_DATABASE_CONNECTION;
+  global.harvest_dbstring = process.env.HARVEST_DATABASE_CONNECTION 
   global.db_connector = new PostgresqlConnector(global.harvest_dbstring);
   console.info("Database Config Initialized", global.harvest_dbstring);
   return;
@@ -26,31 +26,32 @@ var databaseInit = async () => {
 
 var mqInit = async () => {
   console.info("Initializing MQ Client");
-  global.config.mq_address = process.env.MQ_ADDRESS 
+  global.config.mq_address = process.env.MQ_ADDRESS || "amqp://localhost:5672";
   global.mq_connector = await new RabbitConnector(global.config.mq_address);
-  global.queues={};
-  global.queues.url_archive ='url_archive_process';
-  
+  global.queues = {};
+  global.queues.url_archive = 'url_archive_process';
+  global.queues.harvest_archive = 'harvest_archive_process';
+
   console.info("MQ Client Initialized", global.config.mq_address);
   return;
 };
 
-  var appInit = async () => {
-
-    global.SecretKey = process.env.SECRETKEY ;
-    global.AccessKey = process.env.ACCESSKEY;
-    global.S3Bucket = process.env.BUCKET;
-    global.Region =  process.env.REGION;
-
-    global.AzureKey = process.env.AZUREKEY;
-
-    global.config.offset = process.env.OFFSET;
-    global.config.limit = process.env.LIMIT;
-    console.info("General App Initialized");
-
-    return;
+var appInit = async () => {
+  if (!global.config) {
+    global.config = {};
   }
+  global.SecretKey = process.env.SECRETKEY 
+  global.AccessKey = process.env.ACCESSKEY 
+  global.S3Bucket = process.env.BUCKET 
+  global.Region = process.env.REGION 
+
+  global.AzureKey = process.env.AZUREKEY 
+
+  console.info("General App Initialized");
+
+  return;
+}
 
 
-
-  module.exports.globalInit = globalInit;
+module.exports.globalInit = globalInit;
+module.exports.appInit = appInit;

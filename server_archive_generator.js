@@ -29,7 +29,10 @@ var main = async () => {
   try {
     await global_init.globalInit();
     checkProgress();
-    await archiver.archive(global.config.offset, global.config.limit);
+    await archiver.generateHarvestArchive();
+
+
+
   } catch (err) {
     console.error(err);
     throw err;
