@@ -10,16 +10,16 @@ var sleep = (time) => {
   });
 }
 
-var checkProgress = async () => {
+var checkProgress = async (archiver) => {
   var progress = archiver.progress();
   console.info(progress.message);
-  if (progress.currentUrl === progress.totalUrls) {
-    console.info("Archive Process Complete");
+  if (progress.totalUrls!==0 && progress.currentUrl === progress.totalUrls) {
+    console.info("URL Archive Process Complete");
     return;
 
   } else {
     await sleep(10000);
-    checkProgress();
+    checkProgress(archiver);
   }
 }
 
@@ -27,7 +27,7 @@ var checkProgress = async () => {
 var onMessage = async (data, done) => {
   try {
     var archiver = new Archiver();
-    checkProgress();
+    checkProgress(archiver);
     await archiver.generateUrlArchive(data.harvest_id);
 
     done();

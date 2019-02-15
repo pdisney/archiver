@@ -12,13 +12,11 @@ var sleep = (time) => {
 
 var checkProgress = async()=>{
   var progress = archiver.progress();
-  console.info(progress.message);
-  if(progress.currentHarvest === progress.harvests){
-    console.info("Processing Last Harvest");
-    if(progress.currentUrl === progress.totalUrls){
-      console.info("Archive Process Complete");
-      return;
-    }
+  console.info(progress.message, archiver.total, archiver.current, archiver.total);
+
+  if(archiver.total !==0 && archiver.current === archiver.total){
+    console.info("Harvest Processing Complete");
+    return
   }else{
     await sleep(10000);
     checkProgress();

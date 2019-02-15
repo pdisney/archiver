@@ -36,8 +36,9 @@ class Archiver {
     generateUrlArchive(harvest_id) {
         return (async () => {
             try {
+                var rabbitpublisher = new RabbitPublisher(global.mq_connector);
                 this.currentHarvest = harvest_id;
-                query = "SELECT urls.id as url_id, domains.domain_id, domains.harvest_id  FROM urls INNER JOIN(SELECT domains.id as domain_id, harvest_id FROM domains WHERE harvest_id = $1)domains ON domains.domain_id = urls.domain_id order by urls.id;"
+                var query = "SELECT urls.id as url_id, domains.domain_id, domains.harvest_id  FROM urls INNER JOIN(SELECT domains.id as domain_id, harvest_id FROM domains WHERE harvest_id = $1)domains ON domains.domain_id = urls.domain_id order by urls.id;"
                 var params = [harvest_id];
                 var urls = await global.db_connector.query(query, params);
                 this.urls = urls.length;
@@ -60,7 +61,12 @@ class Archiver {
         if(this.total!==0){
             var message = "Processing Harvest " + this.current + " of " + this.total + ".";
         }else{
-            var message = "Processing Harvest "+ this.currentHarvest +".  Processing url " + this.currentUrl + " of " + this.urls
+            var message = "Processing Harvest "+ this.currentHarvest +".";
+            if(this.currentUrl ===0 && this.urls ===0){
+                message+=" Querying urls for harvest "+this.currentHarvest+".";
+            } else{
+                message+= " Processing url " + this.currentUrl + " of " + this.urls;
+            } 
         }
         var output = {};
         output.message = message;
