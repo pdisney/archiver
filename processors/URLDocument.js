@@ -10,7 +10,7 @@ class URLDocument {
         this.ocr = [];
         if (ocr)
             this.ocr = ocr;
-        this.images = [];
+       
         this.entities = [];
         if (entities)
             this.entities = entities;
