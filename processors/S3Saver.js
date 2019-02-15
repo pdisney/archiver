@@ -1,5 +1,4 @@
 const aws = require('aws-sdk');
-const URL = require('url');
 
 
 var upload = (params, s3) => {
@@ -26,18 +25,15 @@ class S3Saver {
         this.s3 = new aws.S3();
 
     }
-    saveDocument(document, S3Bucket) {
+    saveDocument(key, document) {
         return (async () => {
             try {
-                var url = URL.parse(document.url);
 
-                var time = Date.now().toString();
-
-                var filename = url.hostname + "/" + url.hostname + "_" + time + ".json";
-
-                var params = { "Bucket": S3Bucket, "Key": filename, "Body": JSON.stringify(document) };
+                var params = { "Bucket": global.S3Bucket, "Key": key, "Body": JSON.stringify(document) };
 
                 await upload(params, this.s3);
+
+                return;
 
             } catch (err) {
                 console.error(err);

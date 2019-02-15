@@ -2,6 +2,7 @@ const URL = require('url');
 const AzureStorageWrapper = require('../libs/AzureStorageWrapper');
 const link_extractor = require('../libs/link_extractor/link_extractor');
 const UrlDocument = require('./URLDocument');
+const UrlImageDocument = require('./URLImageDocument');
 const S3Saver = require('./S3Saver');
 /**
  * images -
@@ -191,10 +192,21 @@ class DocumentManager {
                 var links = await link_extractor.getAllLinks(urldata.url, urldata.html);
 
                 var document = new UrlDocument(domain, urldata.url, urldata.timestamp,
-                    ipAddresses, urldata.html, ocr, images,
+                    ipAddresses, urldata.html, ocr,
                     entities, products, relationships, links);
 
-                this.saveDocument(document);
+                var time = Date.now().toString();
+
+                var filename = domain + "/" + domain + "_" + time + ".json";
+                await this.s3saver.saveDocument(filename, document);
+
+                if (images.length > 0) {
+                    var imageDocument = new UrlImageDocument(domain, urldata.url, urldata.timestamp, images);
+                    var imagefilename = domain + "/" + domain + "_" + time + "_images.json";
+                    await this.s3saver.saveDocument(imagefilename, imageDocument);
+                }
+
+
 
                 return document;
             } catch (err) {
@@ -205,13 +217,6 @@ class DocumentManager {
     }
 
 
-    saveDocument(document) {
-        return (async () => {
-
-            this.s3saver.saveDocument(document, global.S3Bucket)
-
-        })();
-    }
 
 
 
