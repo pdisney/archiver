@@ -49,9 +49,9 @@ var getOcr = async (url_id, harvest_id) => {
         var query = "SELECT url, ocr, preprocess_algorithm, age_off as timestamp FROM images WHERE url_id = $1 ORDER BY url";
         var params = [url_id];
         var rows = await global.db_connector.query(query, params);
-        var images =  await getImages(rows, harvest_id);
+        var images = await getImages(rows, harvest_id);
 
-        return {"ocr":rows,"images":images};
+        return { "ocr": rows, "images": images };
     } catch (err) {
         console.error(err);
         throw err;
@@ -182,7 +182,8 @@ class DocumentManager {
     createDocument() {
         return (async () => {
             try {
-                var urldata =  await getUrlData(this.url_id);
+                var start = Date.now();
+                var urldata = await getUrlData(this.url_id);
                 var domain = getHostName(urldata.url);
 
                 var result = await Promise.all([
@@ -210,18 +211,23 @@ class DocumentManager {
 
                 var time = Date.now().toString();
                 var timestamp = new Date(document.timestamp).toISOString().substring(0, 10);
-
                 var filename = domain + "/" + domain + "_" + timestamp + "_" + time + ".json";
-
-                await global.AzureUpload.saveDocument(filename, document);
 
                 if (images.length > 0) {
                     var imageDocument = new UrlImageDocument(domain, urldata.url, urldata.timestamp, images);
                     var imagefilename = domain + "/" + domain + "_" + timestamp + "_" + time + "_images.json";
-                    await global.AzureUpload.saveDocument(imagefilename, imageDocument);
+                    await Promise.all([
+                        global.AzureUpload.saveDocument(imagefilename, imageDocument),
+                        global.AzureUpload.saveDocument(filename, document)
+                    ]);
+                } else {
+                    await global.AzureUpload.saveDocument(filename, document);
                 }
 
+                var end = Date.now();
+                var elapsedTime = (end - start) /1000;
 
+                console.info("Collection Time:", elapsedTime," sec for ", document.url);
 
                 return document;
             } catch (err) {
