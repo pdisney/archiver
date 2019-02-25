@@ -13,7 +13,7 @@ var sleep = (time) => {
 var checkProgress = async (archiver) => {
   var progress = archiver.progress();
   console.info(progress.message);
-  if (progress.totalUrls!==0 && progress.currentUrl === progress.totalUrls) {
+  if (progress.totalUrls !== 0 && progress.currentUrl === progress.totalUrls) {
     console.info("URL Archive Process Complete");
     return;
 

@@ -1,10 +1,11 @@
 const URL = require('url');
-const AzureStorageWrapper = require('../libs/AzureStorageWrapper');
+
 const link_extractor = require('../libs/link_extractor/link_extractor');
 const UrlDocument = require('./URLDocument');
 const UrlImageDocument = require('./URLImageDocument');
 //const S3Saver = require('./S3Saver');
-const AzureBlobSaver = require('./AzureBlobSaver');
+//const AzureStorageWrapper = require('../libs/AzureStorageWrapper');
+//const AzureBlobSaver = require('./AzureBlobSaver');
 /**
  * images -
  *      tables: columns
@@ -54,7 +55,7 @@ var getOcr = async (url_id) => {
         throw err;
     }
 }
-var getImages = async (ocr_data, harvest_id, azureconnector) => {
+var getImages = async (ocr_data, harvest_id) => {
     try {
         var images = [];
         var image_url;
@@ -62,7 +63,7 @@ var getImages = async (ocr_data, harvest_id, azureconnector) => {
             var record = ocr_data[i];
             if (!image_url || image_url !== record.url) {
                 image_url = record.url;
-                var image = await azureconnector.getBase64Image(image_url, harvest_id);
+                var image = await global.AzureDownload.getBase64Image(image_url, harvest_id);
                 if (image) {
                     images.push({ "url": image_url, "encoding": "base64", "timestamp": record.timestamp, "image": image });
                 }
@@ -171,8 +172,7 @@ class DocumentManager {
         this.url_id = url_id;
         this.domain_id = domain_id;
         this.harvest_id = harvest_id;
-        this.azureconnector = new AzureStorageWrapper();
-        this.azureSaver = new AzureBlobSaver();
+    
 
         return this;
     }
@@ -186,7 +186,7 @@ class DocumentManager {
                 var ipAddresses = await getIpAddress(this.domain_id);
 
                 var ocr = await getOcr(this.url_id);
-                var images = await getImages(ocr, this.harvest_id, this.azureconnector);
+                var images = await getImages(ocr, this.harvest_id);
                 var entities = await getEntities(this.url_id);
                 var products = await getPProductRecords(this.url_id);
                 var relationships = await getRelationships(this.domain_id);
@@ -198,16 +198,15 @@ class DocumentManager {
 
                 var time = Date.now().toString();
                 var timestamp = new Date(document.timestamp).toISOString().substring(0, 10);
-                var container = domain;
-
+               
                 var filename = domain + "/" + domain + "_" + timestamp + "_" + time + ".json";
 
-                await this.azureSaver.saveDocument(container, filename, document);
+                await global.AzureUpload.saveDocument(filename, document);
 
                 if (images.length > 0) {
                     var imageDocument = new UrlImageDocument(domain, urldata.url, urldata.timestamp, images);
                     var imagefilename = domain + "/" + domain +"_" + timestamp + "_" + time + "_images.json";
-                    await this.azureSaver.saveDocument(container, imagefilename, imageDocument);
+                    await global.AzureUpload.saveDocument(imagefilename, imageDocument);
                 }
 
 

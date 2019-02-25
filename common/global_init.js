@@ -1,6 +1,8 @@
 const PostgresqlConnector = require('../libs/PostgresqlConnector')
 const RabbitConnector = require("../libs/rabbitmq/RabbitConnector");
 const loggingInit = require('../libs/winston/loginit');
+const AzureStorageWrapper = require('../libs/AzureStorageWrapper');
+const AzureBlobSaver = require('../processors/AzureBlobSaver');
 
 var globalInit = async () => {
   try {
@@ -50,10 +52,14 @@ var appInit = async () => {
   global.AzureCoolKey = process.env.AZURECOOLKEY;
   global.AzurecoolBucket = process.env.AZURECOOLBUCKET;
 
+  global.AzureDownload =  new AzureStorageWrapper();
+  global.AzureUpload = new AzureBlobSaver();
+
   console.info("General App Initialized");
 
   return;
 }
+
 
 module.exports.globalInit = globalInit;
 module.exports.appInit = appInit;

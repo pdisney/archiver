@@ -4,20 +4,20 @@ var archiver = new Archiver();
 
 var sleep = (time) => {
   return new Promise(resolve => {
-      setTimeout(() => {
-          return resolve();
-      }, time);
+    setTimeout(() => {
+      return resolve();
+    }, time);
   });
 }
 
-var checkProgress = async()=>{
+var checkProgress = async () => {
   var progress = archiver.progress();
   console.info(progress.message, archiver.total, archiver.current, archiver.total);
 
-  if(archiver.total !==0 && archiver.current === archiver.total){
+  if (archiver.total !== 0 && archiver.current === archiver.total) {
     console.info("Harvest Processing Complete");
     return
-  }else{
+  } else {
     await sleep(10000);
     checkProgress();
   }
