@@ -3,7 +3,8 @@ const AzureStorageWrapper = require('../libs/AzureStorageWrapper');
 const link_extractor = require('../libs/link_extractor/link_extractor');
 const UrlDocument = require('./URLDocument');
 const UrlImageDocument = require('./URLImageDocument');
-const S3Saver = require('./S3Saver');
+//const S3Saver = require('./S3Saver');
+const AzureBlobSaver = require('./AzureBlobSaver');
 /**
  * images -
  *      tables: columns
@@ -171,7 +172,7 @@ class DocumentManager {
         this.domain_id = domain_id;
         this.harvest_id = harvest_id;
         this.azureconnector = new AzureStorageWrapper();
-        this.s3saver = new S3Saver();
+        this.azureSaver = new AzureBlobSaver();
 
         return this;
     }
@@ -196,14 +197,17 @@ class DocumentManager {
                     entities, products, relationships, links);
 
                 var time = Date.now().toString();
+                var timestamp = new Date(document.timestamp).toISOString().substring(0, 10);
+                var container = domain;
 
-                var filename = domain + "/" + domain + "_" + time + ".json";
-                await this.s3saver.saveDocument(filename, document);
+                var filename = domain + "/" + domain + "_" + timestamp + "_" + time + ".json";
+
+                await this.azureSaver.saveDocument(container, filename, document);
 
                 if (images.length > 0) {
                     var imageDocument = new UrlImageDocument(domain, urldata.url, urldata.timestamp, images);
-                    var imagefilename = domain + "/" + domain + "_" + time + "_images.json";
-                    await this.s3saver.saveDocument(imagefilename, imageDocument);
+                    var imagefilename = domain + "/" + domain +"_" + timestamp + "_" + time + "_images.json";
+                    await this.azureSaver.saveDocument(container, imagefilename, imageDocument);
                 }
 
 

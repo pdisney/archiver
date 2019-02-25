@@ -1,7 +1,6 @@
 const global_init = require('./common/global_init.js');
 const RabbitConsumer = require('./libs/rabbitmq/RabbitConsumer');
-const DocumentManager = require('./processors/DocumentManager');
-
+var DocumentManager;
 
 
 var onMessage = async (data, done) => {
@@ -10,16 +9,20 @@ var onMessage = async (data, done) => {
 
     await documentManager.createDocument();
 
-    done();
+   // done();
   } catch (err) {
     console.error(err);
-    done();
+  //  done();
   }
 };
 
 var main = async () => {
   try {
     await global_init.globalInit();
+
+    DocumentManager = require('./processors/DocumentManager');
+ 
+
     await new RabbitConsumer(global.mq_connector, global.queues.url_archive, onMessage);
     return;
   } catch (err) {
