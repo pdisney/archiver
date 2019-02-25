@@ -144,6 +144,54 @@ const uploadDocument = async (blobService, container, filename, data) => {
 	});
 };
 
+const listBlobs = async (container) => {
+	return new Promise((resolve, reject) => {
+		blobService.listBlobsSegmented(container, null, (err, data) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve({ message: `${data.entries.length} blobs in '${containerName}'`, blobs: data.entries });
+			}
+		});
+	});
+};
+
+const downloadBlob = async (containerName, blobName) => {
+	const dowloadFilePath = path.resolve('./' + blobName.replace('.txt', '.downloaded.txt'));
+	return new Promise((resolve, reject) => {
+		blobService.getBlobToText(containerName, blobName, (err, data) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve({ message: `Blob downloaded "${data}"`, text: data });
+			}
+		});
+	});
+};
+
+const deleteBlob = async (containerName, blobName) => {
+	return new Promise((resolve, reject) => {
+		blobService.deleteBlobIfExists(containerName, blobName, err => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve({ message: `Block blob '${blobName}' deleted` });
+			}
+		});
+	});
+};
+
+const deleteContainer = async (containerName) => {
+	return new Promise((resolve, reject) => {
+		blobService.deleteContainer(containerName, err => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve({ message: `Container '${containerName}' deleted` });
+			}
+		});
+	});
+};
 
 
 class AzureStorageWrapper {
@@ -162,12 +210,16 @@ class AzureStorageWrapper {
 
 
 				var imageStatus = await getImageStatus(azureStorageProperties.containerName, azureStorageProperties.blobName, this.blobService);
-				if (imageStatus.isSuccessful) {
+				if (imageStatus && imageStatus.isSuccessful) {
 					image_details.exists = true;
 				} else {
 					imageStatus = await getImageStatus(azureStorageProperties.containerName, azureStorageProperties.oldFormatblobname, this.blobService);
-					image_details.exists = imageStatus.isSuccessful;
-					image_details.blobName = azureStorageProperties.oldFormatblobname;
+					if (imageStatus) {
+						image_details.exists = imageStatus.isSuccessful;
+						image_details.blobName = azureStorageProperties.oldFormatblobname;
+					} else {
+						image_details.exists = false;
+					}
 				}
 				return image_details;
 
