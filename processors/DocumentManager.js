@@ -44,12 +44,14 @@ var getIpAddress = async (domain_id) => {
     }
 }
 
-var getOcr = async (url_id) => {
+var getOcr = async (url_id, harvest_id) => {
     try {
         var query = "SELECT url, ocr, preprocess_algorithm, age_off as timestamp FROM images WHERE url_id = $1 ORDER BY url";
         var params = [url_id];
         var rows = await global.db_connector.query(query, params);
-        return rows;
+        var images =  await getImages(rows, harvest_id);
+
+        return {"ocr":rows,"images":images};
     } catch (err) {
         console.error(err);
         throw err;
@@ -172,7 +174,7 @@ class DocumentManager {
         this.url_id = url_id;
         this.domain_id = domain_id;
         this.harvest_id = harvest_id;
-    
+
 
         return this;
     }
@@ -180,17 +182,27 @@ class DocumentManager {
     createDocument() {
         return (async () => {
             try {
-                var urldata = await getUrlData(this.url_id);
-
+                var urldata =  await getUrlData(this.url_id);
                 var domain = getHostName(urldata.url);
-                var ipAddresses = await getIpAddress(this.domain_id);
 
-                var ocr = await getOcr(this.url_id);
-                var images = await getImages(ocr, this.harvest_id);
-                var entities = await getEntities(this.url_id);
-                var products = await getPProductRecords(this.url_id);
-                var relationships = await getRelationships(this.domain_id);
-                var links = await link_extractor.getAllLinks(urldata.url, urldata.html);
+                var result = await Promise.all([
+                    getIpAddress(this.domain_id),
+                    getOcr(this.url_id, this.harvest_id),
+                    getEntities(this.url_id),
+                    getPProductRecords(this.url_id),
+                    getRelationships(this.domain_id),
+                    link_extractor.getAllLinks(urldata.url, urldata.html)
+                ])
+
+
+                var ipAddresses = result[0];// await getIpAddress(this.domain_id);
+
+                var ocr = result[1].rows;// await getOcr(this.url_id);
+                var images = result[1].images;// await getImages(ocr, this.harvest_id);
+                var entities = result[2];// await getEntities(this.url_id);
+                var products = result[3];// await getPProductRecords(this.url_id);
+                var relationships = result[4];// await getRelationships(this.domain_id);
+                var links = result[5];// await link_extractor.getAllLinks(urldata.url, urldata.html);
 
                 var document = new UrlDocument(domain, urldata.url, urldata.timestamp,
                     ipAddresses, urldata.html, ocr,
@@ -198,14 +210,14 @@ class DocumentManager {
 
                 var time = Date.now().toString();
                 var timestamp = new Date(document.timestamp).toISOString().substring(0, 10);
-               
+
                 var filename = domain + "/" + domain + "_" + timestamp + "_" + time + ".json";
 
                 await global.AzureUpload.saveDocument(filename, document);
 
                 if (images.length > 0) {
                     var imageDocument = new UrlImageDocument(domain, urldata.url, urldata.timestamp, images);
-                    var imagefilename = domain + "/" + domain +"_" + timestamp + "_" + time + "_images.json";
+                    var imagefilename = domain + "/" + domain + "_" + timestamp + "_" + time + "_images.json";
                     await global.AzureUpload.saveDocument(imagefilename, imageDocument);
                 }
 
