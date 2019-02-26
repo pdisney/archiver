@@ -266,7 +266,7 @@ class DocumentManager {
                     msg.harvest_id = this.harvest_id;
                     msg.domain = domain;
                     msg.url = urldata.url;
-                    msg.timestamp = urldata.timestamp;
+                    msg.timestamp = timestamp;
                     msg.ocr = ocr;
                     msg.time = time;
                     await this.publisher.publish(global.queues.image_archive, msg);
