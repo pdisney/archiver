@@ -36,7 +36,7 @@ var onMessage = async (data, done) => {
     done();
   } catch (err) {
     console.error(err);
-  //  done();
+   done();
   }
 };
 
