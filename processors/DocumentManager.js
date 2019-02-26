@@ -23,13 +23,13 @@ const RabbitPublisher = require('../libs/rabbitmq/RabbitPublisher');
  */
 var getUrlData = async (url_id) => {
     try {
-        var start = Date.now();
+     //   var start = Date.now();
         var query = "SELECT url, html, age_off as timestamp FROM urls WHERE id = $1";
         var params = [url_id];
         var rows = await global.db_connector.query(query, params);
-        var end = Date.now();
-        var elapsedTime = (end - start) / 1000;
-        console.info("URL Data Collection Time:", elapsedTime, " sec");
+      //  var end = Date.now();
+      //  var elapsedTime = (end - start) / 1000;
+     //   console.info("URL Data Collection Time:", elapsedTime, " sec");
 
         return rows[0];
     } catch (err) {
@@ -53,14 +53,14 @@ var getIpAddress = async (domain_id) => {
 
 var getOcr = async (url_id, harvest_id) => {
     try {
-        var start = Date.now();
+       // var start = Date.now();
         var query = "SELECT url, ocr, preprocess_algorithm, age_off as timestamp FROM images WHERE url_id = $1 ORDER BY url";
         var params = [url_id];
         var rows = await global.db_connector.query(query, params);
 
-        var end = Date.now();
-        var elapsedTime = (end - start) / 1000;
-        console.info("OCR Collection Time:", elapsedTime, " sec");
+      //  var end = Date.now();
+      //  var elapsedTime = (end - start) / 1000;
+      //  console.info("OCR Collection Time:", elapsedTime, " sec");
         // var images = await getImages(rows, harvest_id);
 
         return rows;// { "ocr": rows, "images": images };
@@ -92,24 +92,24 @@ var getImages = async (ocr_data, harvest_id) => {
 }
 
 var getEntities = async (url_id) => {
-    var start = Date.now();
+   // var start = Date.now();
     var results = await Promise.all([getEntityRecords(url_id), getPropertyRecords(url_id)]);
     var output = results[0].concat(results[1]);
 
-    var end = Date.now();
-    var elapsedTime = (end - start) / 1000;
-    console.info("Entities Collection Time:", elapsedTime, " sec");
+  //  var end = Date.now();
+ //   var elapsedTime = (end - start) / 1000;
+  //  console.info("Entities Collection Time:", elapsedTime, " sec");
     return output;
 }
 var getEntityRecords = async (url_id) => {
     try {
-        var start = Date.now();
+      //  var start = Date.now();
         var query = "SELECT type, value, age_off as timestamp FROM url_entities WHERE url_id = $1;"
         var params = [url_id];
 
-        var end = Date.now();
-        var elapsedTime = (end - start) / 1000;
-        console.info("Entity Collection Time:", elapsedTime, " sec");
+       // var end = Date.now();
+      //  var elapsedTime = (end - start) / 1000;
+      //  console.info("Entity Collection Time:", elapsedTime, " sec");
         return await global.db_connector.query(query, params);
     } catch (err) {
         console.error(err);
@@ -118,12 +118,12 @@ var getEntityRecords = async (url_id) => {
 }
 var getPropertyRecords = async (url_id) => {
     try {
-        var start = Date.now();
+      //  var start = Date.now();
         var query = "SELECT type, value, age_off as timestamp FROM url_properties WHERE url_id = $1;"
         var params = [url_id];
-        var end = Date.now();
-        var elapsedTime = (end - start) / 1000;
-        console.info("Property Collection Time:", elapsedTime, " sec");
+      //  var end = Date.now();
+       // var elapsedTime = (end - start) / 1000;
+      //  console.info("Property Collection Time:", elapsedTime, " sec");
         return await global.db_connector.query(query, params);
     } catch (err) {
         console.error(err);
@@ -132,13 +132,13 @@ var getPropertyRecords = async (url_id) => {
 }
 var getProductRecords = async (url_id) => {
     try {
-        var start = Date.now();
+      //  var start = Date.now();
         var query = "SELECT type, name, price, dosage, quantity, age_off as timestamp FROM url_drug_relationships WHERE url_id = $1;"
         var params = [url_id];
 
-        var end = Date.now();
-        var elapsedTime = (end - start) / 1000;
-        console.info("Product Collection Time:", elapsedTime, " sec");
+       // var end = Date.now();
+       // var elapsedTime = (end - start) / 1000;
+       // console.info("Product Collection Time:", elapsedTime, " sec");
         return await global.db_connector.query(query, params);
     } catch (err) {
         console.error(err);
@@ -167,13 +167,13 @@ var getRelationships = async (domain_id) => {
 
 var getRedirects = async (domain_id) => {
     try {
-        var start = Date.now();
+      //  var start = Date.now();
         var query = "SELECT  url_source as source_url, url_redirect as endpoint_url, 'redirect' as type, age_off as timestamp FROM url_redirects WHERE domain_id = $1;"
         var params = [domain_id];
       
-        var end = Date.now();
-        var elapsedTime = (end - start) /1000;
-        console.info("Redirect Collection Time:", elapsedTime," sec");
+       // var end = Date.now();
+      //  var elapsedTime = (end - start) /1000;
+       // console.info("Redirect Collection Time:", elapsedTime," sec");
         return await global.db_connector.query(query, params);
     } catch (err) {
         console.error(err);
@@ -182,12 +182,12 @@ var getRedirects = async (domain_id) => {
 }
 var getActiveScrape = async (domain_id) => {
     try {
-       var start = Date.now();
+      // var start = Date.now();
         var query = "SELECT  origin_url as source_url, endpoint_url, pattern_type as type, age_off as timestamp FROM url_active_scrape WHERE domain_id = $1 AND pattern_type <> $2;"
         var params = [domain_id, 'landing'];
-        var end = Date.now();
-        var elapsedTime = (end - start) /1000;
-        console.info("Active Scrape Collection Time:", elapsedTime," sec");
+      //  var end = Date.now();
+      //  var elapsedTime = (end - start) /1000;
+      //  console.info("Active Scrape Collection Time:", elapsedTime," sec");
         return await global.db_connector.query(query, params);
     } catch (err) {
         console.error(err);
@@ -196,13 +196,13 @@ var getActiveScrape = async (domain_id) => {
 }
 var getProcessorRelationships = async (domain_id) => {
     try {
-        var start = Date.now();
+      //  var start = Date.now();
         var query = "SELECT source_url, processor_url as endpoint_url, processor_type as type, capture_date as timestamp FROM processor_relationships WHERE domain_id = $1;"
         var params = [domain_id];
        
-        var end = Date.now();
-        var elapsedTime = (end - start) /1000;
-        console.info("Processor Relation Collection Time:", elapsedTime," sec");
+        //var end = Date.now();
+       // var elapsedTime = (end - start) /1000;
+      //  console.info("Processor Relation Collection Time:", elapsedTime," sec");
         return await global.db_connector.query(query, params);
     } catch (err) {
         console.error(err);
@@ -270,8 +270,8 @@ class DocumentManager {
                     msg.ocr = ocr;
                     msg.time = time;
                     await this.publisher.publish(global.queues.image_archive, msg);
-                    console.info("q", global.queues.image_archive);
-                    console.info("MSG", msg);
+                //    console.info("q", global.queues.image_archive);
+                //    console.info("MSG", msg);
                     /* var imageDocument = new UrlImageDocument(domain, urldata.url, urldata.timestamp, images);
                      var imagefilename = domain + "/" + domain + "_" + timestamp + "_" + time + "_images.json";
                      await Promise.all([
