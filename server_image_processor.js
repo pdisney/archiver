@@ -31,7 +31,7 @@ var onMessage = async (data, done) => {
     var imagefilename = data.domain + "/" + data.domain + "_" + data.timestamp + "_" + data.time + "_images.json";
     await global.AzureUpload.saveDocument(imagefilename, imageDocument);
     
-    console.info("Document Images Uploaded", data.url);
+    console.info("Image Documents Uploaded", data.url);
 
     done();
   } catch (err) {

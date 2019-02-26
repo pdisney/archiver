@@ -230,7 +230,7 @@ class DocumentManager {
     createDocument() {
         return (async () => {
             try {
-                var start = Date.now();
+               // var start = Date.now();
                 var urldata = await getUrlData(this.url_id);
                 var domain = getHostName(urldata.url);
 
@@ -280,10 +280,10 @@ class DocumentManager {
                      ]);*/
                 }
 
-                var end = Date.now();
-                var elapsedTime = (end - start) / 1000;
+               // var end = Date.now();
+              //  var elapsedTime = (end - start) / 1000;
 
-                console.info("Collection Time:", elapsedTime, " sec for ", document.url);
+             //   console.info("Collection Time:", elapsedTime, " sec for ", document.url);
 
                 return document;
             } catch (err) {
