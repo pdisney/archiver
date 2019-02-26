@@ -34,6 +34,7 @@ var mqInit = async () => {
   global.queues = {};
   global.queues.url_archive = 'url_archive_process';
   global.queues.harvest_archive = 'harvest_archive_process';
+  global.queues.image_archive = 'image_archive_process';
 
   console.info("MQ Client Initialized", global.config.mq_address);
   return;
@@ -58,6 +59,8 @@ var awsInit = async () => {
   global.Region = process.env.REGION;
 }
 
+
+
 var appInit = async () => {
   if (!global.config) {
     global.config = {};
@@ -72,3 +75,4 @@ var appInit = async () => {
 module.exports.globalInit = globalInit;
 module.exports.azureInit = azureInit;
 module.exports.appInit = appInit;
+
