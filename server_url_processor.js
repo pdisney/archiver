@@ -8,7 +8,7 @@ var onMessage = async (data, done) => {
 
     var document = await documentManager.createDocument();
 
-    console.info("Document Uploaded", document.url);
+    //console.info("Document Uploaded", document.url);
 
     done();
   } catch (err) {
