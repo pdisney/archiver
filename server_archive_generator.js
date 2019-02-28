@@ -18,7 +18,7 @@ var checkProgress = async () => {
     console.info("Harvest Processing Complete");
     return
   } else {
-    await sleep(10000);
+    await sleep(30000);
     checkProgress();
   }
 }
@@ -26,6 +26,7 @@ var checkProgress = async () => {
 var main = async () => {
   try {
     await global_init.globalInit();
+    await global_init.databaseInit();
     checkProgress();
     await archiver.generateHarvestArchive();
 

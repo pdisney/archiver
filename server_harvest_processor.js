@@ -40,6 +40,7 @@ var onMessage = async (data, done) => {
 var main = async () => {
   try {
     await global_init.globalInit();
+    await global_init.databaseInit();
     await new RabbitConsumer(global.mq_connector, global.queues.harvest_archive, onMessage);
     return;
   } catch (err) {

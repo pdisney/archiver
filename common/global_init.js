@@ -9,7 +9,6 @@ var globalInit = async () => {
     global.config = {};
     await loggingInit.loggingInit();
     await appInit();
-    await databaseInit();
     await mqInit();
 
     return;
@@ -52,6 +51,9 @@ var azureInit = async () => {
   console.info("AZURE Clients Inititialized");
 }
 
+
+
+
 var awsInit = async () => {
   global.SecretKey = process.env.SECRETKEY;
   global.AccessKey = process.env.ACCESSKEY;
@@ -73,6 +75,7 @@ var appInit = async () => {
 
 
 module.exports.globalInit = globalInit;
+module.exports.databaseInit = databaseInit;
 module.exports.azureInit = azureInit;
 module.exports.appInit = appInit;
 

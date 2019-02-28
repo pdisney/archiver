@@ -21,6 +21,7 @@ var onMessage = async (data, done) => {
 var main = async () => {
   try {
     await global_init.globalInit();
+    await global_init.databaseInit();
     await global_init.azureInit();
 
     await new RabbitConsumer(global.mq_connector, global.queues.url_archive, onMessage);
