@@ -33,10 +33,10 @@ var onMessage = async (data, done) => {
     
    // console.info("Image Documents Uploaded", data.url);
 
-  //  done();
+    done();
   } catch (err) {
     console.error(err);
- //  done();
+   done();
   }
 };
 
