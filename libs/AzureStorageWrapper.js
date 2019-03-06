@@ -49,7 +49,7 @@ var getImageStatus = async (containerName, blobname, blobService) => {
 	return new Promise((resolve, reject) => {
 		blobService.getBlobProperties(containerName, blobname, (err, properties, status) => {
 			if (err) {
-				console.error("Error downloading image " + err + " " + blobname);
+				console.error("Error downloading image ", container, err, blobname);
 			}
 			return resolve(status);
 		});
