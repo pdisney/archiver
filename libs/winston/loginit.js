@@ -64,8 +64,9 @@ var loggingInit = async () => {
         json: false,
         handleExceptions: true,
         level: "error",
-        maxsize: 5242880, //5MB
-        maxFiles: 1000
+        tailable: true,
+        maxsize: 52428800, // 50MB
+        maxFiles: 10,
     });
 
 
@@ -74,8 +75,9 @@ var loggingInit = async () => {
         filename: path.join(global.config.log_file_directory, 'process.log'),
         json: false,
         level: global.config.log_level,
-        maxsize: 5242880, //5MB
-        maxFiles: 1000
+        tailable: true,
+        maxsize: 52428800, // 50MB
+        maxFiles: 10,
     });
 
 
