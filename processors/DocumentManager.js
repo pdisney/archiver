@@ -39,7 +39,7 @@ var getFirstRecords = async (section, query, params, domain, url, timestamp, fil
 
         var total = results[0];
         var records = results[1];
-        console.info("total", total);
+        console.info(section, "Total", total, "for", url);
         if (total > RECORDLIMIT) {
             console.info("Generating Collection Jobs for ", url, section,"total records:", total);
 
