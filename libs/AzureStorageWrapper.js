@@ -45,11 +45,11 @@ var getContainerName = (harvest_id) => {
 	return containerName;
 }
 
-var getImageStatus = async (containerName, blobname, blobService) => {
+var getImageStatus = async (container, blobname, blobService) => {
 	return new Promise((resolve, reject) => {
-		blobService.getBlobProperties(containerName, blobname, (err, properties, status) => {
+		blobService.getBlobProperties(container, blobname, (err, properties, status) => {
 			if (err) {
-				console.error("Error downloading image ", container, err, blobname);
+				console.error( err.name, err.message, container, blobname);
 			}
 			return resolve(status);
 		});
@@ -219,6 +219,7 @@ class AzureStorageWrapper {
 						image_details.exists = imageStatus.isSuccessful;
 						image_details.blobName = azureStorageProperties.oldFormatblobname;
 					} else {
+						console.info("GENERA",GENERAL_CONTAINER_NAME);
 						imageStatus = await getImageStatus(GENERAL_CONTAINER_NAME, azureStorageProperties.blobName, this.blobService);
 						if (imageStatus && imageStatus.isSuccessful) {
 							image_details.exists = imageStatus.isSuccessful;
