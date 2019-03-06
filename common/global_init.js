@@ -34,6 +34,7 @@ var mqInit = async () => {
   global.queues.url_archive = 'url_archive_process';
   global.queues.harvest_archive = 'harvest_archive_process';
   global.queues.image_archive = 'image_archive_process';
+  global.queues.section_continuation = 'section_continuation_process';
 
   console.info("MQ Client Initialized", global.config.mq_address);
   return;

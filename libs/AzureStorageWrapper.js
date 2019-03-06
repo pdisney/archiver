@@ -115,7 +115,7 @@ var uploadImage = (container, filename, data, content_typ) => {
 				return reject(err);
 			});
 			writeStream.on('end', () => {
-				console.info("[AzureWrapper] Image streaming to " + containerName + " complete: " + blobname + " dataLength:" + dataLength);
+				console.info("[AzureWrapper] document streaming to " + containerName + " complete: " + blobname + " dataLength:" + dataLength);
 				if (dataLength === 0) {
 					deleteBlob(containerName, blobname).then(() => {
 						return resolve(0);
