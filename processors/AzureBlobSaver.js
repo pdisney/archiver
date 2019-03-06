@@ -69,7 +69,7 @@ var uploadFile = (blobService, container, filename, document, content_type) => {
                 return reject(err);
             });
             writeStream.on('end', () => {
-                console.info("[AzureUpload] Image streaming to " + container + " complete: " + filename + " dataLength:" + dataLength);
+                console.info("[AzureUpload] document streaming to " + container + " complete: " + filename + " dataLength:" + dataLength);
                 if (dataLength === 0) {
                     deleteBlob(blobService, container, filename).then(() => {
                         return resolve(0);
