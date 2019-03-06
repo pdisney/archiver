@@ -194,6 +194,8 @@ const deleteContainer = async (containerName) => {
 };
 
 
+
+
 class AzureStorageWrapper {
 	constructor() {
 		this.blobService = azure_storage.createBlobService(STORAGE_SERVICE, global.AzureKey);
@@ -208,17 +210,29 @@ class AzureStorageWrapper {
 				image_details.containerName = azureStorageProperties.containerName;
 				image_details.blobName = azureStorageProperties.blobName;
 
-
 				var imageStatus = await getImageStatus(azureStorageProperties.containerName, azureStorageProperties.blobName, this.blobService);
 				if (imageStatus && imageStatus.isSuccessful) {
 					image_details.exists = true;
 				} else {
 					imageStatus = await getImageStatus(azureStorageProperties.containerName, azureStorageProperties.oldFormatblobname, this.blobService);
-					if (imageStatus) {
+					if (imageStatus && imageStatus.isSuccessful) {
 						image_details.exists = imageStatus.isSuccessful;
 						image_details.blobName = azureStorageProperties.oldFormatblobname;
 					} else {
-						image_details.exists = false;
+						imageStatus = await getImageStatus(GENERAL_CONTAINER_NAME, azureStorageProperties.blobName, this.blobService);
+						if (imageStatus && imageStatus.isSuccessful) {
+							image_details.exists = imageStatus.isSuccessful;
+							image_details.containerName = GENERAL_CONTAINER_NAME;
+						} else {
+							imageStatus = await getImageStatus(GENERAL_CONTAINER_NAME, azureStorageProperties.oldFormatblobname, this.blobService);
+							if (imageStatus && imageStatus.isSuccessful) {
+								image_details.exists = imageStatus.isSuccessful;
+								image_details.blobName = azureStorageProperties.oldFormatblobname;
+								image_details.containerName = GENERAL_CONTAINER_NAME;
+							} else {
+								image_details.exists = false;
+							}
+						}
 					}
 				}
 				return image_details;

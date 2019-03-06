@@ -29,7 +29,7 @@ const RECORDLIMIT = 5000;
 
 var getFirstRecords = async (section, query, params, domain, url, timestamp, filesaver) => {
     try {
-        console.info("Getting Records for", section, url);
+        console.debug("Getting Records for", section, url);
         var offsetquery = getOffsetQuery(query, params, 0);
 
         var results = await Promise.all([
@@ -39,7 +39,7 @@ var getFirstRecords = async (section, query, params, domain, url, timestamp, fil
 
         var total = results[0];
         var records = results[1];
-        console.info(section, "Total", total, "for", url);
+        console.debug(section, "Total", total, "for", url);
         if (total > RECORDLIMIT) {
             console.info("Generating Collection Jobs for ", url, section,"total records:", total);
 
