@@ -102,8 +102,8 @@ var createContinuationDocument = async (section, query, params, offset, total, d
                 , [], [], []);
 
             var publisher = new RabbitPublisher(global.mq_connector);
-            query = getOffsetQuery(query, params, offset);
-            var msg = new URLContinuationDocument(query.query, query.params, document, section);
+            var offsetquery = getOffsetQuery(query, params, offset);
+            var msg = new URLContinuationDocument(offsetquery.query, offsetquery.params, document, section);
             await publisher.publish(global.queues.section_continuation, msg);
            
             offset = offset + RECORDLIMIT;
