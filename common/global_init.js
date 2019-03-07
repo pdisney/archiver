@@ -1,7 +1,7 @@
 const PostgresqlConnector = require('../libs/PostgresqlConnector')
 const RabbitConnector = require("../libs/rabbitmq/RabbitConnector");
 const loggingInit = require('../libs/winston/loginit');
-const AzureStorageWrapper = require('../libs/AzureStorageWrapper');
+const AzureImageRetriever = require('../libs/AzureImageRetriever');
 const AzureBlobSaver = require('../processors/AzureBlobSaver');
 
 var globalInit = async () => {
@@ -36,6 +36,7 @@ var mqInit = async () => {
   global.queues.image_archive = 'image_archive_process';
   global.queues.section_continuation = 'section_continuation_process';
   global.queues.continuation_generator = 'continuation_generator';
+  global.queues.saver = 'saver';
 
   console.info("MQ Client Initialized", global.config.mq_address);
   return;
@@ -48,7 +49,7 @@ var azureInit = async () => {
   global.AzureCoolBucket = process.env.AZURECOOLBUCKET;
   global.AzureCoolStorageAccount = process.env.AZURECOOLSTORAGEACCOUNT;
 
-  global.AzureDownload = new AzureStorageWrapper();
+  global.AzureDownload = new AzureImageRetriever();
   global.AzureUpload = new AzureBlobSaver();
   console.info("AZURE Clients Inititialized");
 }

@@ -31,6 +31,17 @@ const getAzureWriteStream = async (blobService, container, filename, content_typ
     });
 }
 
+var getFileStatus = async (container, blobname, blobService) => {
+	return new Promise((resolve, reject) => {
+		blobService.getBlobProperties(container, blobname, (err, properties, status) => {
+			if (err) {
+				console.debug( err.name, err.message, container, blobname);
+			}
+			return resolve(status);
+		});
+	});
+}
+
 const deleteBlob = async (blobService, container, filename) => {
     return new Promise((resolve, reject) => {
         blobService.deleteBlobIfExists(container, filename, err => {
@@ -46,6 +57,7 @@ const deleteBlob = async (blobService, container, filename) => {
 var uploadFile = (blobService, container, filename, document, content_type) => {
     return new Promise((resolve, reject) => {
 
+       
         var documentStream = new Readable();
         documentStream.push(document);
         documentStream.push(null);
@@ -107,7 +119,10 @@ class AzureBlobSaver {
         return (async () => {
             try {
                 await createContainer(this.blobService, global.AzureCoolBucket);
-                await uploadFile(this.blobService, global.AzureCoolBucket, filename, JSON.stringify(document), "application/json");
+                var status = await getFileStatus(global.AzureCoolBucket, filename, this.blobService);
+                if(!status.isSuccessful){
+                    await uploadFile(this.blobService, global.AzureCoolBucket, filename, JSON.stringify(document), "application/json");
+                }
             } catch (err) {
                 console.error(err);
                 throw err;

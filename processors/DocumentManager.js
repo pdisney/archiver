@@ -8,7 +8,7 @@ const RECORDLIMIT = 5000;
 
 //const FileSaver = require('./FileSaver');
 //const S3Saver = require('./S3Saver');
-//const AzureStorageWrapper = require('../libs/AzureStorageWrapper');
+//const AzureImageRetriever = require('../libs/AzureImageRetriever');
 //const AzureBlobSaver = require('./AzureBlobSaver');
 /**
  * images -
@@ -103,33 +103,6 @@ var getOffsetQuery = (query, params, offset) => {
 
     }
 }
-
-var createContinuationDocument = async (section, query, params, offset, total, domain, url, timestamp) => {
-    try {
-        if (offset < total) {
-            var document = new UrlDocument(domain, url, timestamp, [], "", [], []
-                , [], [], []);
-
-            var publisher = new RabbitPublisher(global.mq_connector);
-            var offsetquery = getOffsetQuery(query, params, offset);
-            var msg = new URLContinuationDocument(offsetquery.query, offsetquery.params, document, section);
-            await publisher.publish(global.queues.section_continuation, msg);
-           
-            offset = offset + RECORDLIMIT;
-
-            await createContinuationDocument(section, query, params, offset, total, domain, url, timestamp);
-
-        } else {
-            return;
-        }
-
-    } catch (err) {
-        console.error(err);
-        throw err;
-    }
-
-}
-
 
 
 var getUrlData = async (url_id) => {
@@ -233,7 +206,6 @@ var getProductRecords = async (url_id, domain, url, timestamp) => {
 
 var getRelationships = async (domain_id, domain, url, timestamp) => {
     try {
-        console.info("DOMAIN_ID", domain_id, "URL", url);
         var results = await Promise.all([
             getRedirects(domain_id, domain, url, timestamp),
             getActiveScrape(domain_id, domain, url, timestamp),
@@ -336,9 +308,12 @@ class DocumentManager {
                 var timestamp = new Date(document.timestamp).toISOString().substring(0, 10);
                 var filename = domain + "/" + domain + "_" + timestamp + "_" + time + ".json";
                 //var filename = domain + "_" + timestamp + "_" + time + ".json";
-
-
-                await global.AzureUpload.saveDocument(filename, document);
+                var publisher = new RabbitPublisher(global.mq_connector);
+                var msg = {};
+                msg.filename = filename;
+                msg.document = document;
+                await publisher.publish(global.queues.saver, msg);
+               // await global.AzureUpload.saveDocument(filename, document);
                 //await this.filesaver.saveDocument(document, filename);
 
 

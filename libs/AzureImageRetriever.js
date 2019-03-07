@@ -65,24 +65,7 @@ var getAzureStorageProperties = (url, harvest_id) => {
 }
 
 
-var getAzureWriteStream = async (container, filename, content_type) => {
-	return new Promise((resolve) => {
-		return resolve(blobService.createWriteStreamToBlockBlob(
-			container,
-			filename,
-			{ contentType: content_type },//content_type'image/jpeg' },
-			(err, result, response) => {
-				if (err) {
-					console.error("Couldn't upload file %s ", filename, err);
-
-				} else {
-					console.debug('File %s uploaded to ', filename, container);
-				}
-			}));
-	});
-}
-
-
+///Unused methods 
 const createContainer = async (blobService, container) => {
 	return new Promise((resolve, reject) => {
 		blobService.createContainerIfNotExists(container, { publicAccessLevel: 'blob' }, err => {
@@ -94,43 +77,6 @@ const createContainer = async (blobService, container) => {
 		});
 	});
 };
-
-var uploadImage = (container, filename, data, content_typ) => {
-	return new Promise((resolve, reject) => {
-
-		getAzureWriteStream(container, filename, content_type).then(writeStream => {
-			var dataLength = 0;
-			stream.on('data', (data) => {
-				dataLength += data.length;
-				writeStream.write(data);
-			});
-			stream.on('end', () => {
-				writeStream.end();
-			});
-			stream.on('error', (err) => {
-				console.error("AzureWriteStream Error", err);
-				return reject(err);
-			});
-			writeStream.on('error', (err) => {
-				return reject(err);
-			});
-			writeStream.on('end', () => {
-				console.info("[AzureWrapper] document streaming to " + containerName + " complete: " + blobname + " dataLength:" + dataLength);
-				if (dataLength === 0) {
-					deleteBlob(containerName, blobname).then(() => {
-						return resolve(0);
-					}).catch(err => {
-						return reject(err);
-					})
-				} else {
-					return resolve(dataLength);
-				}
-			});
-		});
-	}).catch(err => {
-		return reject(err);
-	});
-}
 
 const uploadDocument = async (blobService, container, filename, data) => {
 	return new Promise((resolve, reject) => {
@@ -192,11 +138,11 @@ const deleteContainer = async (containerName) => {
 		});
 	});
 };
+///unused methods
 
 
 
-
-class AzureStorageWrapper {
+class AzureImageRetriever {
 	constructor() {
 		this.blobService = azure_storage.createBlobService(STORAGE_SERVICE, global.AzureKey);
 	}
@@ -274,48 +220,11 @@ class AzureStorageWrapper {
 		})();
 	}
 
-	recordFile(container, filename, document) {
-		return (async () => {
-			try {
-				await createContainer(this.blobService, container);
-				await uploadDocument(this.blobService, container, filename, JSON.stringify(data));
-			} catch (err) {
-				console.error(err);
-				throw err;
-			}
-		})();
-
-	}
-
-	recordImage(collection_id, domain, type, url, stream) {
-		return (async () => {
-			try {
-				var url = decodeURIComponent(url);
-				var blobname = getImageFileName(domain, type, url);
-
-				//create 2 copies of stream
-				var st1 = new pass;
-				var st2 = new pass;
-				stream.pipe(st1);
-				stream.pipe(st2);
-
-				var hv_size = 0;
-				//record image to harvest specific collection.
-				if (collection_id !== 'general') {
-					hv_size = await uploadImage('hv' + collection_id.toString(), blobname, st1);
-				}
-				var gen_size = await uploadImage(GENERAL_CONTAINER_NAME, blobname, st2);
-				return gen_size;
-			} catch (err) {
-				throw err;
-			}
-		})();
-
-	}
 }
 
 
-module.exports = AzureStorageWrapper;
+module.exports = AzureImageRetriever;
+
 
 
 

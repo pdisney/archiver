@@ -1,13 +1,10 @@
 const global_init = require('./common/global_init.js');
 const RabbitConsumer = require('./libs/rabbitmq/RabbitConsumer');
-var DocumentManager = require('./processors/DocumentManager');
+
 
 var onMessage = async (data, done) => {
   try {
-    var documentManager = new DocumentManager(data.harvest_id, data.domain_id, data.url_id);
-
-    await documentManager.createDocument();
-
+    await global.AzureUpload.saveDocument(data.filename, data.document);
     done();
   } catch (err) {
     console.error(err);
@@ -16,13 +13,12 @@ var onMessage = async (data, done) => {
 };
 
 
+
 var main = async () => {
   try {
     await global_init.globalInit();
-    await global_init.databaseInit();
-  
-
-    await new RabbitConsumer(global.mq_connector, global.queues.url_archive, onMessage);
+    await global_init.azureInit();  
+    await new RabbitConsumer(global.mq_connector, global.queues.saver, onMessage);
 
     return;
   } catch (err) {

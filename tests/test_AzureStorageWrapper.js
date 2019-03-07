@@ -2,7 +2,7 @@
 
 
 const expect = require('chai').expect;
-const AzureStorageWrapper = require('../libs/AzureStorageWrapper');
+const AzureImageRetriever = require('../libs/AzureImageRetriever');
 const globalinit = require('../common/global_init');
 const fs = require('fs');
 
@@ -22,11 +22,11 @@ var writeFile = (fullpath, data) => {
 
 
 
-describe('AzureStorageWrapper test', function () {
+describe('AzureImageRetriever test', function () {
   this.timeout(720000);
   it('Test constructor', async function () {
     globalinit.appInit();
-    var azure = new AzureStorageWrapper();
+    var azure = new AzureImageRetriever();
 
     var containername = 163;
 
