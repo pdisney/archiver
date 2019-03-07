@@ -3,6 +3,7 @@ const RabbitConsumer = require('./libs/rabbitmq/RabbitConsumer');
 const UrlImageDocument = require('./processors/URLImageDocument');
 const RabbitPublisher = require('./libs/rabbitmq/RabbitPublisher');
 var publisher;
+const MAX_IMGES = 10;
 
 var getImages = async (ocr_data, harvest_id) => {
   try {
@@ -25,25 +26,58 @@ var getImages = async (ocr_data, harvest_id) => {
   }
 }
 
+var createImageDocument = async (images, url, domain, timestamp, time, index) => {
+  try {
+    
+    if (images.length > MAX_IMGES) {
+      var sliced = images.slice(0, MAX_IMGES);
+      var imageDocument = new UrlImageDocument(domain, url, timestamp, sliced);
+      var imagefilename = domain + "/" + domain + "_" + timestamp + "_" + time + "cont_"+index+"_images.json";
+
+      var msg = {};
+      msg.filename = imagefilename;
+      msg.document = imageDocument;
+     // console.info(domain, "Partial Images", imagefilename, sliced.length);
+      await publisher.publish(global.queues.saver, msg);
+      var remaining = images.slice(MAX_IMGES);
+      await createImageDocument(remaining, url, domain, timestamp, time, index++);
+
+    } else {
+      var imageDocument = new UrlImageDocument(domain, url, timestamp, images);
+      var imagefilename = domain + "/" + domain + "_" + timestamp + "_" + time + "_images.json";
+    //  console.info(domain, "Initial Images", imagefilename, images.length);
+      var msg = {};
+      msg.filename = imagefilename;
+      msg.document = imageDocument;
+      await publisher.publish(global.queues.saver, msg);
+    }
+
+  } catch (err) {
+    console.error(err);
+
+  }
+}
+
 
 var onMessage = async (data, done) => {
   try {
     var images = await getImages(data.ocr, data.harvest_id);
-    var imageDocument = new UrlImageDocument(data.domain, data.url, data.timestamp, images);
-    var imagefilename = data.domain + "/" + data.domain + "_" + data.timestamp + "_" + data.time + "_images.json";
+    console.info("Image Total", data.domain, images.length);
 
-    var msg = {};
-    msg.filename = imagefilename;
-    msg.document = imageDocument;
-    await publisher.publish(global.queues.saver, msg);
-    //  await global.AzureUpload.saveDocument(imagefilename, imageDocument);
+    await createImageDocument(images, data.url, data.domain, data.timestamp, data.time, 1);
 
-    // console.info("Image Documents Uploaded", data.url);
+    //var imageDocument = new UrlImageDocument(data.domain, data.url, data.timestamp, images);
+    // var imagefilename = data.domain + "/" + data.domain + "_" + data.timestamp + "_" + data.time + "_images.json";
+
+    //  var msg = {};
+    //  msg.filename = imagefilename;
+    //  msg.document = imageDocument;
+    //  await publisher.publish(global.queues.saver, msg);
 
     done();
   } catch (err) {
     console.error(err);
-    done();
+    //  done();
   }
 };
 
