@@ -4,8 +4,6 @@ const RabbitPublisher = require('./libs/rabbitmq/RabbitPublisher');
 const URLContinuationDocument = require('./processors/URLContinuationDocument');
 const DocumentManager = require('./processors/DocumentManager');
 const RECORDLIMIT = 5000;
-var publisher;
-
 
 
 
@@ -14,10 +12,10 @@ var onMessage = async (data, done) => {
 
     await sectionContinuation(data.section, data.query, data.params, RECORDLIMIT, data.total, data.document);
 
-  //  done();
+    done();
   } catch (err) {
     console.error(err);
-    //done();
+    done();
   }
 };
 
@@ -27,10 +25,12 @@ var onMessage = async (data, done) => {
 var sectionContinuation = async (section, query, params, offset, total, document) => {
   try {
     if (offset < total) {
+      var publisher = new RabbitPublisher(global.mq_connector);
       var offsetquery = DocumentManager.getOffsetQuery(query, params, offset);
       var msg = new URLContinuationDocument(offsetquery.query, offsetquery.params, document, section);
       await publisher.publish(global.queues.section_continuation, msg);
       offset = offset + RECORDLIMIT;
+      console.info("Continuation message Published",section, document.url, offset, "of",total);
 
       await sectionContinuation(section, query, params, offset, total, document);
     }
@@ -45,7 +45,7 @@ var sectionContinuation = async (section, query, params, offset, total, document
 var main = async () => {
   try {
     await global_init.globalInit();
-    publisher = new RabbitPublisher(global.mq_connector);
+  
     await new RabbitConsumer(global.mq_connector, global.queues.continuation_generator, onMessage);
 
     return;
