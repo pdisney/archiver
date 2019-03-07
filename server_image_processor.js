@@ -34,17 +34,18 @@ var createImageDocument = async (images, url, domain, timestamp, time, index) =>
       var sliced = images.slice(0, MAX_IMGES);
       var imageDocument = new UrlImageDocument(domain, url, timestamp, sliced);
       var imagefilename = domain + "/" + domain + "_" + timestamp + "_" + time + "cont_"+index+"_images.json";
-      if(images.length>MAX_IMGES && index===1){
-        console.info(domain,"image total", images.length, imagefilename);
-      }
+  
+      console.info(domain,"image total", images.length, imagefilename);
+     
       var msg = {};
       msg.filename = imagefilename;
       msg.document = imageDocument;
      // console.info(domain, "Partial Images", imagefilename, sliced.length);
       await publisher.publish(global.queues.saver, msg);
       var remaining = images.slice(MAX_IMGES);
+     
       index = index +1;
-      await createImageDocument(remaining, url, domain, timestamp, time, index);
+       await createImageDocument(remaining, url, domain, timestamp, time, index);
 
     } else {
       var imageDocument = new UrlImageDocument(domain, url, timestamp, images);
