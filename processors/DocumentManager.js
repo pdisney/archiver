@@ -40,10 +40,19 @@ var getFirstRecords = async (section, query, params, domain, url, timestamp, fil
         var total = results[0];
         var records = results[1];
         console.debug(section, "Total", total, "for", url);
-        if (total > RECORDLIMIT) {
-            console.info("Generating Collection Jobs for ", url, section,"total records:", total);
 
-            await createContinuationDocument(section, query, params, RECORDLIMIT, total, domain, url, timestamp, filesaver);
+        if (total > RECORDLIMIT) {
+            console.info("Starting Continuation Generator", section, total, url);
+            var document = new UrlDocument(domain, url, timestamp, [], "", [], []
+            , [], [], []);
+            var msg = {};
+            msg.section = section;
+            msg.query = query;
+            msg.params = params;
+            msg.total = total;
+            msg.document = document;
+            var publisher = new RabbitPublisher(global.mq_connector);
+            await publisher.publish(global.queues.continuation_generator, msg);
         }
         return records;
     } catch (err) {
@@ -224,6 +233,7 @@ var getProductRecords = async (url_id, domain, url, timestamp) => {
 
 var getRelationships = async (domain_id, domain, url, timestamp) => {
     try {
+        console.info("DOMAIN_ID", domain_id, "URL", url);
         var results = await Promise.all([
             getRedirects(domain_id, domain, url, timestamp),
             getActiveScrape(domain_id, domain, url, timestamp),
@@ -243,8 +253,8 @@ var getRelationships = async (domain_id, domain, url, timestamp) => {
 
 var getRedirects = async (domain_id, domain, url, timestamp) => {
     try {
-        var query = "SELECT  url_source as source_url, url_redirect as endpoint_url, 'redirect' as type, age_off as timestamp FROM url_redirects WHERE domain_id = $1"
-        var params = [domain_id];
+        var query = "SELECT  url_source as source_url, url_redirect as endpoint_url, 'redirect' as type, age_off as timestamp FROM url_redirects WHERE url_source = $1 AND domain_id = $2"
+        var params = [url, domain_id];
         return await getFirstRecords("relationships", query, params, domain, url, timestamp);
     } catch (err) {
         console.error(err);
@@ -254,8 +264,8 @@ var getRedirects = async (domain_id, domain, url, timestamp) => {
 var getActiveScrape = async (domain_id, domain, url, timestamp) => {
     try {
 
-        var query = "SELECT  origin_url as source_url, endpoint_url, pattern_type as type, age_off as timestamp FROM url_active_scrape WHERE domain_id = $1 AND pattern_type <> $2"
-        var params = [domain_id, 'landing'];
+        var query = "SELECT  origin_url as source_url, endpoint_url, pattern_type as type, age_off as timestamp FROM url_active_scrape WHERE origin_url = $1 AND domain_id = $2 AND pattern_type <> $3"
+        var params = [url, domain_id, 'landing'];
 
         return await getFirstRecords("relationships", query, params, domain, url, timestamp);
     } catch (err) {
@@ -265,8 +275,8 @@ var getActiveScrape = async (domain_id, domain, url, timestamp) => {
 }
 var getProcessorRelationships = async (domain_id, domain, url, timestamp) => {
     try {
-        var query = "SELECT source_url, processor_url as endpoint_url, processor_type as type, capture_date as timestamp FROM processor_relationships WHERE domain_id = $1"
-        var params = [domain_id];
+        var query = "SELECT source_url, processor_url as endpoint_url, processor_type as type, capture_date as timestamp FROM processor_relationships WHERE source_url = $1 AND domain_id = $2"
+        var params = [url, domain_id];
 
         return await getFirstRecords("relationships", query, params, domain, url, timestamp);
     } catch (err) {
@@ -366,3 +376,5 @@ class DocumentManager {
 
 
 module.exports = DocumentManager;
+
+module.exports.getOffsetQuery=getOffsetQuery;

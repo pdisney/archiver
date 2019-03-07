@@ -43,7 +43,7 @@ class PostgresqlConnector {
                     return reject(err);
                 });
             }).catch(err => {
-                console.error("Offending Query", query,values);
+                console.error("Offending Query", query , values);
                 console.error(err);
                 return reject(err);
             });
