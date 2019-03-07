@@ -33,7 +33,7 @@ var onMessage = async (data, done) => {
     var imagefilename = data.domain + "/" + data.domain + "_" + data.timestamp + "_" + data.time + "_images.json";
 
     var msg = {};
-    msg.filename = data.imagefilename;
+    msg.filename = imagefilename;
     msg.document = imageDocument;
     await publisher.publish(global.queues.saver, msg);
     //  await global.AzureUpload.saveDocument(imagefilename, imageDocument);
