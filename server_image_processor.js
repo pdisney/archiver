@@ -43,7 +43,8 @@ var createImageDocument = async (images, url, domain, timestamp, time, index) =>
      // console.info(domain, "Partial Images", imagefilename, sliced.length);
       await publisher.publish(global.queues.saver, msg);
       var remaining = images.slice(MAX_IMGES);
-      await createImageDocument(remaining, url, domain, timestamp, time, index++);
+      index = index +1;
+      await createImageDocument(remaining, url, domain, timestamp, time, index);
 
     } else {
       var imageDocument = new UrlImageDocument(domain, url, timestamp, images);
