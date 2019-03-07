@@ -31,20 +31,30 @@ var getFirstRecords = async (section, query, params, domain, url, timestamp, fil
     try {
         console.debug("Getting Records for", section, url);
         var offsetquery = getOffsetQuery(query, params, 0);
+        var start = Date.now();
+
 
         var results = await Promise.all([
             getTotal(query, params),
             global.db_connector.query(offsetquery.query, offsetquery.params)
         ]);
 
+        var end = Date.now();
+        var elapsedTime = (end - start) / 1000;
+        if (elapsedTime > 1.5) {
+            console.info(section, " Data Collection Time:", elapsedTime, " sec", domain, query, params);
+        }
         var total = results[0];
-        var records = results[1];
+        var records = [];
+        if (total > 0) {
+            records = results[1];
+        }
         console.debug(section, "Total", total, "for", url);
 
         if (total > RECORDLIMIT) {
             console.info("Starting Continuation Generator", section, total, url);
             var document = new UrlDocument(domain, url, timestamp, [], "", [], []
-            , [], [], []);
+                , [], [], []);
             var msg = {};
             msg.section = section;
             msg.query = query;
@@ -143,31 +153,19 @@ var getOcr = async (url_id, domain, url, timestamp) => {
     }
 }
 
-var getImages = async (ocr_data, harvest_id) => {
-    try {
-        var images = [];
-        var image_url;
-        for (var i = 0; i < ocr_data.length; i++) {
-            var record = ocr_data[i];
-            if (!image_url || image_url !== record.url) {
-                image_url = record.url;
-                var image = await global.AzureDownload.getBase64Image(image_url, harvest_id);
-                if (image) {
-                    images.push({ "url": image_url, "encoding": "base64", "timestamp": record.timestamp, "image": image });
-                }
-            }
-        }
-        return images;
-    } catch (err) {
-        console.error(err);
-        throw err;
-    }
-}
-
 var getEntities = async (url_id, domain, url, timestamp) => {
     var results = await Promise.all([getEntityRecords(url_id, domain, url, timestamp),
     getPropertyRecords(url_id, domain, url, timestamp)]);
-    var records = results[0].concat(results[1]);
+
+    var records = [];
+    if (results[0].length > 0) {
+        records = records.concat(results[0]);
+    }
+    if (results[1].length > 0) {
+        records = records.concat(results[1]);
+    }
+
+
 
     return records;
 }
@@ -211,9 +209,16 @@ var getRelationships = async (domain_id, domain, url, timestamp) => {
             getActiveScrape(domain_id, domain, url, timestamp),
             getProcessorRelationships(domain_id, domain, url, timestamp)
         ]);
-        var records = results[0].concat(results[1]);
-        records = records.concat(results[3]);
-
+        var records = [];
+        if (results[0].length > 0) {
+            records = records.concat(results[0]);
+        }
+        if (results[1].length > 0) {
+            records = records.concat(results[1]);
+        }
+        if (results[2].length > 0) {
+            records = records.concat(results[2]);
+        }
 
         return records;
     } catch (err) {
@@ -225,9 +230,13 @@ var getRelationships = async (domain_id, domain, url, timestamp) => {
 
 var getRedirects = async (domain_id, domain, url, timestamp) => {
     try {
-        var query = "SELECT  url_source as source_url, url_redirect as endpoint_url, 'redirect' as type, age_off as timestamp FROM url_redirects WHERE url_source = $1 AND domain_id = $2"
-        var params = [url, domain_id];
-        return await getFirstRecords("relationships", query, params, domain, url, timestamp);
+
+
+        var query = "SELECT  url_source as source_url, url_redirect as endpoint_url, 'redirect' as type, age_off as timestamp FROM url_redirects WHERE (url_source = $1 OR url_source=$2) AND domain_id = $3"
+        var urlalt = url + '/';
+        var params = [url, urlalt, domain_id];
+        var records = await getFirstRecords("relationships", query, params, domain, url, timestamp);
+        return records
     } catch (err) {
         console.error(err);
         throw err;
@@ -236,10 +245,14 @@ var getRedirects = async (domain_id, domain, url, timestamp) => {
 var getActiveScrape = async (domain_id, domain, url, timestamp) => {
     try {
 
-        var query = "SELECT  origin_url as source_url, endpoint_url, pattern_type as type, age_off as timestamp FROM url_active_scrape WHERE origin_url = $1 AND domain_id = $2 AND pattern_type <> $3"
-        var params = [url, domain_id, 'landing'];
 
-        return await getFirstRecords("relationships", query, params, domain, url, timestamp);
+        var query = "SELECT  origin_url as source_url, endpoint_url, pattern_type as type, age_off as timestamp FROM url_active_scrape WHERE (origin_url = $1 OR origin_url=$2) AND domain_id = $3 AND pattern_type <> $4"
+        var urlalt = url + '/';
+        var params = [url, urlalt, domain_id, 'landing'];
+
+        var records = await getFirstRecords("relationships", query, params, domain, url, timestamp);
+        return records;
+
     } catch (err) {
         console.error(err);
         throw err;
@@ -247,8 +260,9 @@ var getActiveScrape = async (domain_id, domain, url, timestamp) => {
 }
 var getProcessorRelationships = async (domain_id, domain, url, timestamp) => {
     try {
-        var query = "SELECT source_url, processor_url as endpoint_url, processor_type as type, capture_date as timestamp FROM processor_relationships WHERE source_url = $1 AND domain_id = $2"
-        var params = [url, domain_id];
+        var query = "SELECT source_url, processor_url as endpoint_url, processor_type as type, capture_date as timestamp FROM processor_relationships WHERE (source_url = $1 OR source_url=$2) AND domain_id = $3"
+        var urlalt = url + '/';
+        var params = [url, urlalt, domain_id];
 
         return await getFirstRecords("relationships", query, params, domain, url, timestamp);
     } catch (err) {
@@ -269,7 +283,7 @@ class DocumentManager {
         this.domain_id = domain_id;
         this.harvest_id = harvest_id;
         this.publisher = new RabbitPublisher(global.mq_connector);
-       // this.filesaver = new FileSaver();
+        // this.filesaver = new FileSaver();
 
         return this;
     }
@@ -295,7 +309,7 @@ class DocumentManager {
                 var ipAddresses = result[0];
 
                 var ocr = result[1];
-                 var entities = result[2];
+                var entities = result[2];
                 var products = result[3];
                 var relationships = result[4];
                 var links = result[5];
@@ -304,32 +318,9 @@ class DocumentManager {
                     ipAddresses, urldata.html, ocr,
                     entities, products, relationships, links);
 
-                var time = Date.now().toString();
-                var timestamp = new Date(document.timestamp).toISOString().substring(0, 10);
-                var filename = domain + "/" + domain + "_" + timestamp + "_" + time + ".json";
-                //var filename = domain + "_" + timestamp + "_" + time + ".json";
-                var publisher = new RabbitPublisher(global.mq_connector);
-                var msg = {};
-                msg.filename = filename;
-                msg.document = document;
-                await publisher.publish(global.queues.saver, msg);
-               // await global.AzureUpload.saveDocument(filename, document);
-                //await this.filesaver.saveDocument(document, filename);
 
+                return document
 
-                if (ocr.length > 0) {
-                    var msg = {};
-                    msg.harvest_id = this.harvest_id;
-                    msg.domain = domain;
-                    msg.url = urldata.url;
-                    msg.timestamp = timestamp;
-                    msg.ocr = ocr;
-                    msg.time = time;
-                    await this.publisher.publish(global.queues.image_archive, msg);
-                  
-                }
-
-                return document;
             } catch (err) {
                 console.error(err);
                 throw err;
@@ -352,4 +343,4 @@ class DocumentManager {
 
 module.exports = DocumentManager;
 
-module.exports.getOffsetQuery=getOffsetQuery;
+module.exports.getOffsetQuery = getOffsetQuery;
