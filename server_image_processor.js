@@ -30,10 +30,13 @@ var createImageDocument = async (images, url, domain, timestamp, time, index) =>
   try {
     
     if (images.length > MAX_IMGES) {
+      
       var sliced = images.slice(0, MAX_IMGES);
       var imageDocument = new UrlImageDocument(domain, url, timestamp, sliced);
       var imagefilename = domain + "/" + domain + "_" + timestamp + "_" + time + "cont_"+index+"_images.json";
-
+      if(images.length>MAX_IMGES && index===1){
+        console.info(data.domain,"image total", images.length, imagefilename);
+      }
       var msg = {};
       msg.filename = imagefilename;
       msg.document = imageDocument;
@@ -45,7 +48,6 @@ var createImageDocument = async (images, url, domain, timestamp, time, index) =>
     } else {
       var imageDocument = new UrlImageDocument(domain, url, timestamp, images);
       var imagefilename = domain + "/" + domain + "_" + timestamp + "_" + time + "_images.json";
-    //  console.info(domain, "Initial Images", imagefilename, images.length);
       var msg = {};
       msg.filename = imagefilename;
       msg.document = imageDocument;
@@ -62,7 +64,7 @@ var createImageDocument = async (images, url, domain, timestamp, time, index) =>
 var onMessage = async (data, done) => {
   try {
     var images = await getImages(data.ocr, data.harvest_id);
-    console.info("Image Total", data.domain, images.length);
+   
 
     await createImageDocument(images, data.url, data.domain, data.timestamp, data.time, 1);
 
