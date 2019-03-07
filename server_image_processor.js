@@ -35,7 +35,7 @@ var createImageDocument = async (images, url, domain, timestamp, time, index) =>
       var imageDocument = new UrlImageDocument(domain, url, timestamp, sliced);
       var imagefilename = domain + "/" + domain + "_" + timestamp + "_" + time + "cont_"+index+"_images.json";
       if(images.length>MAX_IMGES && index===1){
-        console.info(data.domain,"image total", images.length, imagefilename);
+        console.info(domain,"image total", images.length, imagefilename);
       }
       var msg = {};
       msg.filename = imagefilename;
