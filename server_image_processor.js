@@ -53,9 +53,10 @@ var createImageDocument = async (images, url, domain, timestamp, time, index) =>
       var msg = {};
       msg.filename = imagefilename;
       msg.document = imageDocument;
+      console.info(domain,"image total", images.length, imagefilename);
       await publisher.publish(global.queues.saver, msg);
     }
-
+    return;
   } catch (err) {
     console.error(err);
 
@@ -81,7 +82,7 @@ var onMessage = async (data, done) => {
     done();
   } catch (err) {
     console.error(err);
-    //  done();
+   done();
   }
 };
 
