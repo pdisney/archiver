@@ -25,7 +25,10 @@ class URLDocument {
             this.relationships = [];
             if (relationships)
                 this.relationships = relationships;
-            this.links = await link_extractor.getAllLinks(url, html);
+            this.links = [];
+            if(html.length>0){
+                this.links = await link_extractor.getAllLinks(url, html);
+            }
             this.html = html;
             return this;
         })();

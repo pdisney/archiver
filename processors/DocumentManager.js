@@ -48,7 +48,7 @@ var getFirstRecords = async (section, query, params, domain, url, timestamp) => 
 
         if (total > RECORDLIMIT) {
             console.info("Starting Continuation Generator", section, total, url);
-            var document = new UrlDocument(domain, url, timestamp, [], "", [], []
+            var document = await new UrlDocument(domain, url, timestamp, [], "", [], []
                 , [], [], []);
             var msg = {};
             msg.section = section;
