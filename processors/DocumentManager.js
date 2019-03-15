@@ -1,9 +1,5 @@
 const URL = require('url');
-
-const link_extractor = require('../libs/link_extractor/link_extractor');
 const UrlDocument = require('./URLDocument');
-const RabbitPublisher = require('../libs/rabbitmq/RabbitPublisher');
-const URLContinuationDocument = require('./URLContinuationDocument');
 const RECORDLIMIT = 5000;
 
 //const FileSaver = require('./FileSaver');
@@ -27,13 +23,12 @@ const RECORDLIMIT = 5000;
  */
 
 
-var getFirstRecords = async (section, query, params, domain, url, timestamp, filesaver) => {
+var getFirstRecords = async (section, query, params, domain, url, timestamp) => {
     try {
-        console.debug("Getting Records for", section, url);
         var offsetquery = getOffsetQuery(query, params, 0);
         var start = Date.now();
 
-
+     
         var results = await Promise.all([
             getTotal(query, params),
             global.db_connector.query(offsetquery.query, offsetquery.params)
@@ -61,8 +56,7 @@ var getFirstRecords = async (section, query, params, domain, url, timestamp, fil
             msg.params = params;
             msg.total = total;
             msg.document = document;
-            var publisher = new RabbitPublisher(global.mq_connector);
-            await publisher.publish(global.queues.continuation_generator, msg);
+            await global.publisher.publish(global.queues.continuation_generator, msg);
         }
         return records;
     } catch (err) {
@@ -282,8 +276,7 @@ class DocumentManager {
         this.url_id = url_id;
         this.domain_id = domain_id;
         this.harvest_id = harvest_id;
-        this.publisher = new RabbitPublisher(global.mq_connector);
-        // this.filesaver = new FileSaver();
+   //     this.filesaver = new FileSaver();
 
         return this;
     }
@@ -295,16 +288,17 @@ class DocumentManager {
             try {
                 var urldata = await getUrlData(this.url_id);
                 var domain = getHostName(urldata.url);
+           
+             //  await this.filesaver.saveDocument(urldata,'link_extractor_test.html');
 
                 var result = await Promise.all([
                     getIpAddress(this.domain_id),
                     getOcr(this.url_id, domain, urldata.url, urldata.timestamp),
                     getEntities(this.url_id, domain, urldata.url, urldata.timestamp),
                     getProductRecords(this.url_id, domain, urldata.url, urldata.timestamp),
-                    getRelationships(this.domain_id, domain, urldata.url, urldata.timestamp),
-                    link_extractor.getAllLinks(urldata.url, urldata.html)
-                ])
-
+                    getRelationships(this.domain_id, domain, urldata.url, urldata.timestamp)
+                ]);
+           
 
                 var ipAddresses = result[0];
 
@@ -312,14 +306,12 @@ class DocumentManager {
                 var entities = result[2];
                 var products = result[3];
                 var relationships = result[4];
-                var links = result[5];
 
-                var document = new UrlDocument(domain, urldata.url, urldata.timestamp,
-                    ipAddresses, urldata.html, ocr,
-                    entities, products, relationships, links);
-
-
-                return document
+                var document = await new UrlDocument(domain, urldata.url, urldata.timestamp,
+                    ipAddresses, urldata.html, ocr,entities,
+                    entities, products, relationships);
+            
+                return document;
 
             } catch (err) {
                 console.error(err);

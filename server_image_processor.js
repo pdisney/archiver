@@ -1,8 +1,6 @@
 const global_init = require('./common/global_init.js');
 const RabbitConsumer = require('./libs/rabbitmq/RabbitConsumer');
 const UrlImageDocument = require('./processors/URLImageDocument');
-const RabbitPublisher = require('./libs/rabbitmq/RabbitPublisher');
-var publisher;
 const MAX_IMGES = 10;
 
 var getImages = async (ocr_data, harvest_id) => {
@@ -41,7 +39,7 @@ var createImageDocument = async (images, url, domain, timestamp, time, index) =>
       msg.filename = imagefilename;
       msg.document = imageDocument;
      // console.info(domain, "Partial Images", imagefilename, sliced.length);
-      await publisher.publish(global.queues.saver, msg);
+      await global.publisher.publish(global.queues.saver, msg);
       var remaining = images.slice(MAX_IMGES);
      
       index = index +1;
@@ -54,7 +52,7 @@ var createImageDocument = async (images, url, domain, timestamp, time, index) =>
       msg.filename = imagefilename;
       msg.document = imageDocument;
       console.info(domain,"image total", images.length, imagefilename);
-      await publisher.publish(global.queues.saver, msg);
+      await global.publisher.publish(global.queues.saver, msg);
     }
     return;
   } catch (err) {
@@ -91,8 +89,7 @@ var main = async () => {
   try {
     await global_init.globalInit();
     await global_init.azureInit();
-    publisher = new RabbitPublisher(global.mq_connector);
-
+  
     await new RabbitConsumer(global.mq_connector, global.queues.image_archive, onMessage);
 
     return;

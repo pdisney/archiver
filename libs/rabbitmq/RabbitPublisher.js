@@ -17,6 +17,7 @@ class RabbitPublish {
                 if (size !== 0) {
                     size = size / 1000 / 1000;
                 }
+                console.debug("Message Size", size, "MB   Max Size", MAXMESSAGESIZE,"MB");
                 if (size <= MAXMESSAGESIZE) {
                     status = await channel.sendToQueue(q,  Buffer.from(JSON.stringify(message)), { persistent: true });
                     console.debug("Message Sent", q, status, message);

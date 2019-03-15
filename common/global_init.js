@@ -1,5 +1,6 @@
 const PostgresqlConnector = require('../libs/PostgresqlConnector')
 const RabbitConnector = require("../libs/rabbitmq/RabbitConnector");
+const RabbitPublisher = require('../libs/rabbitmq/RabbitPublisher');
 const loggingInit = require('../libs/winston/loginit');
 const AzureImageRetriever = require('../libs/AzureImageRetriever');
 const AzureBlobSaver = require('../processors/AzureBlobSaver');
@@ -30,6 +31,7 @@ var mqInit = async () => {
   console.info("Initializing MQ Client");
   global.config.mq_address = process.env.MQ_ADDRESS;
   global.mq_connector = await new RabbitConnector(global.config.mq_address);
+  global.publisher = new RabbitPublisher(global.mq_connector);
   global.queues = {};
   global.queues.url_archive = 'url_archive_process';
   global.queues.harvest_archive = 'harvest_archive_process';

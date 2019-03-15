@@ -1,6 +1,5 @@
 class URLContinuationDocument {
     constructor(query, params, document, section) {
-
        this.query = query;
        this.params = params;
        this.document = document;

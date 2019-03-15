@@ -1,4 +1,3 @@
-const RabbitPublisher = require('../libs/rabbitmq/RabbitPublisher');
 const fs = require("fs");
 
 var getPath = (type, id) => {
@@ -87,7 +86,7 @@ class Archiver {
                     var harvest_id = harvests[i].id;
                     this.current = i + 1;
                     this.currentHarvest = harvest_id;
-                    await rabbitpublisher.publish(global.queues.harvest_archive, { "harvest_id": harvest_id });
+                    await global.publisher.publish(global.queues.harvest_archive, { "harvest_id": harvest_id });
                     await setOffset('hv', '', this.current+offset);
                 }
             } catch (err) {
@@ -101,7 +100,6 @@ class Archiver {
     generateUrlArchive(harvest_id) {
         return (async () => {
             try {
-                var rabbitpublisher = new RabbitPublisher(global.mq_connector);
                 this.currentHarvest = harvest_id;
                 var offset = await getOffset('hv', this.currentHarvest);
 
@@ -115,7 +113,7 @@ class Archiver {
                     this.currentUrl = x + 1;
                     var url = urls[x];
 
-                    await rabbitpublisher.publish(global.queues.url_archive, url);
+                    await global.publisher.publish(global.queues.url_archive, url);
                     await setOffset('hv', this.currentHarvest, this.currentUrl+offset);
                 }
             } catch (err) {

@@ -213,8 +213,9 @@ var getSubmitForms = async (source_url, html) => {
  */
 var getLinks = async (source_url, html) => {
     try {
-        var doc_url = URL.parse(source_url);
+       
         $ = cheerio.load(html);
+    
         var baseURI = source_url;
         var base = $('base');
         if (base) {
