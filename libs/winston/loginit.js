@@ -81,19 +81,21 @@ var loggingInit = async () => {
     });
 
 
-    var consoleTransport = new (winston.transports.Console)({
-        json: false,
-        level: global.config.log_level
-    });
+    
 
     // log to console if running locally
     var transport = [];
     transport.push(fileExceptionTransport);
     transport.push(fileProcessTransport);
-    transport.push(consoleTransport);
-    if (global.config.redis_address) {
-        transport.push(redisTransport);
+
+    if(global.config.log_location !== 'file'){
+        var consoleTransport = new (winston.transports.Console)({
+            json: false,
+            level: global.config.log_level
+        });
+        transport.push(consoleTransport);
     }
+    
     global.logger = new (winston.Logger)({
         transports: transport,
         exitOnError: handleUncaughtException
