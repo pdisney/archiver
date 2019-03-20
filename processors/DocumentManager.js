@@ -289,6 +289,7 @@ class DocumentManager {
                 var urldata = await getUrlData(this.url_id);
       
                 var domain = getHostName(urldata.url);
+
             
           //    await this.filesaver.saveDocument(urldata,'link_extractor_test3.json');
 
@@ -299,14 +300,15 @@ class DocumentManager {
                     getProductRecords(this.url_id, domain, urldata.url, urldata.timestamp),
                     getRelationships(this.domain_id, domain, urldata.url, urldata.timestamp)
                 ]);
-           
+               
                 var ipAddresses = result[0];
 
                 var ocr = result[1];
                 var entities = result[2];
                 var products = result[3];
                 var relationships = result[4];
-          
+
+              
                 var document = await new UrlDocument(domain, urldata.url, urldata.timestamp,
                     ipAddresses, urldata.html, ocr,entities,
                     entities, products, relationships);

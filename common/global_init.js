@@ -78,6 +78,8 @@ var appInit = async () => {
   global.config.log_location = global.config.log_location.toLowerCase();
   global.config.result_directory = __dirname + "/../results/";
   global.html_analyzer = new HtmlAnalyzer();
+  global.config.tag_limit = process.env.TAG_LIMIT || 5000;
+  global.config.html_char_limit = process.env.HTML_CHAR_LIMIT || 50000000;
 
   console.info("General App Initialized");
 
