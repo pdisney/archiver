@@ -4,6 +4,7 @@ const RabbitPublisher = require('../libs/rabbitmq/RabbitPublisher');
 const loggingInit = require('../libs/winston/loginit');
 const AzureImageRetriever = require('../libs/AzureImageRetriever');
 const AzureBlobSaver = require('../processors/AzureBlobSaver');
+const HtmlAnalyzer = require('@pdisney1/htmlanalyzer/HtmlAnalyzer');
 
 var globalInit = async () => {
   try {
@@ -72,6 +73,11 @@ var appInit = async () => {
   if (!global.config) {
     global.config = {};
   }
+
+  global.config.log_location = process.env.LOG_LOCATION || "file";
+  global.config.log_location = global.config.log_location.toLowerCase();
+  global.config.result_directory = __dirname + "/../results/";
+  global.html_analyzer = new HtmlAnalyzer();
 
   console.info("General App Initialized");
 

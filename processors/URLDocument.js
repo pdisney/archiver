@@ -1,7 +1,4 @@
 
-const link_extractor = require('../libs/link_extractor/link_extractor');
-
-
 
 class URLDocument {
     constructor(domain, url, timestamp, ipAddresses, html, ocr, entities, products, relationships) {
@@ -27,7 +24,7 @@ class URLDocument {
                 this.relationships = relationships;
             this.links = [];
             if(html.length>0){
-                this.links = await link_extractor.getAllLinks(url, html);
+                this.links = await global.html_analyzer.getAllTags(url, html);
             }
             this.html = html;
             return this;

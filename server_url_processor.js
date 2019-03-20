@@ -13,8 +13,6 @@ var onMessage = async (data, done) => {
     var timestamp = new Date(document.timestamp).toISOString().substring(0, 10);
     var filename = document.domain + "/" + document.domain + "_" + timestamp + "_" + time + ".json";
 
-  
-
     var msg = {};
     msg.filename = filename;
     msg.document = document;

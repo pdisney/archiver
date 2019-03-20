@@ -2,7 +2,7 @@
   "name": "archiver",
   "scripts": {
     "testall": "./node_modules/mocha/bin/mocha  ./tests/*.js",
-    "testAzureWrapper": "./node_modules/mocha/bin/mocha  ./tests/test_AzureStorageWrapper.js",
+    "testAzureWrapper": "./node_modules/mocha/bin/mocha  ./tests/test_AzureImageRetriever.js",
     "testUrlDoc": "./node_modules/mocha/bin/mocha  ./tests/test_UrlDocument.js",
     "testsave": "./node_modules/mocha/bin/mocha  ./tests/unit/test_Saver.js",
     "testscrape": "./node_modules/mocha/bin/mocha  ./tests/unit/test_Scraper.js",
@@ -10,7 +10,7 @@
     "testfilescraper": "./node_modules/mocha/bin/mocha  ./tests/unit/test_FileScraper.js",
     "testdownloader": "./node_modules/mocha/bin/mocha  ./tests/unit/test_Downloader.js",
     "integration": "./node_modules/mocha/bin/mocha  ./tests/integration/*",
-    "testS3":"./node_modules/mocha/bin/mocha  ./tests/test_S3Saver.js",
+    "testS3": "./node_modules/mocha/bin/mocha  ./tests/test_S3Saver.js",
     "testwrappers": "./node_modules/mocha/bin/mocha  ./libs/tests/*.js"
   },
   "repository": {
@@ -19,6 +19,7 @@
   },
   "version": "0.0.1",
   "dependencies": {
+    "@pdisney1/htmlanalyzer": "*",
     "amqplib": "*",
     "azure-storage": "*",
     "pg": "*",
