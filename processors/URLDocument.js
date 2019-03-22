@@ -23,7 +23,7 @@ class URLDocument {
             if (relationships)
                 this.relationships = relationships;
             this.links = [];
-            if(html.length>0){
+            if(html && html.length>0){
                 if(html.length>global.config.html_char_limit){
                     console.info(url,'exceeded the HTML character limit. Truncating ',html.length,'characters to',global.config.html_char_limit,"characters for Tag Retrieval.")
                     html = html.substr(0,global.config.html_char_limit);
