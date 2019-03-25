@@ -2,7 +2,7 @@
   "name": "archiver",
   "scripts": {
     "testall": "./node_modules/mocha/bin/mocha  ./tests/*.js",
-    "testAzureWrapper": "./node_modules/mocha/bin/mocha  ./tests/test_AzureImageRetriever.js",
+    "testAzureWrapper": "./node_modules/mocha/bin/mocha  ./tests/test_AzureStorageWrapper.js",
     "testUrlDoc": "./node_modules/mocha/bin/mocha  ./tests/test_UrlDocument.js",
     "testsave": "./node_modules/mocha/bin/mocha  ./tests/unit/test_Saver.js",
     "testscrape": "./node_modules/mocha/bin/mocha  ./tests/unit/test_Scraper.js",

@@ -25,7 +25,7 @@ var sectionContinuation = async (section, query, params, offset, total, document
       var msg = new URLContinuationDocument(offsetquery.query, offsetquery.params, document, section);
       await global.publisher.publish(global.queues.section_continuation, msg);
       offset = offset + RECORDLIMIT;
-      console.info("Continuation message Published",section, document.url, offset, "of",total);
+      console.info("Continuation message Published", section, document.url, offset, "of", total);
 
       await sectionContinuation(section, query, params, offset, total, document);
     }
@@ -40,7 +40,7 @@ var sectionContinuation = async (section, query, params, offset, total, document
 var main = async () => {
   try {
     await global_init.globalInit();
-  
+
     await new RabbitConsumer(global.mq_connector, global.queues.continuation_generator, onMessage);
 
     return;

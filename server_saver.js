@@ -4,7 +4,7 @@ const RabbitConsumer = require('./libs/rabbitmq/RabbitConsumer');
 
 var onMessage = async (data, done) => {
   try {
-    await global.AzureUpload.saveDocument(data.filename, data.document);
+    await global.azureCool.uploadBlobStream(global.AzureCoolContainer, data.filename, data.document, "application/json");
     done();
   } catch (err) {
     console.error(err);
@@ -17,7 +17,7 @@ var onMessage = async (data, done) => {
 var main = async () => {
   try {
     await global_init.globalInit();
-    await global_init.azureInit();  
+    await global_init.azureStorageInit();  
     await new RabbitConsumer(global.mq_connector, global.queues.saver, onMessage);
 
     return;
