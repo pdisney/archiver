@@ -2,8 +2,6 @@ const PostgresqlConnector = require('../libs/PostgresqlConnector')
 const RabbitConnector = require("../libs/rabbitmq/RabbitConnector");
 const RabbitPublisher = require('../libs/rabbitmq/RabbitPublisher');
 const loggingInit = require('../libs/winston/loginit');
-const AzureImageRetriever = require('../libs/AzureImageRetriever');
-const AzureBlobSaver = require('../processors/AzureBlobSaver');
 const HtmlAnalyzer = require('@pdisney1/htmlanalyzer/HtmlAnalyzer');
 
 var globalInit = async () => {
@@ -18,7 +16,6 @@ var globalInit = async () => {
     throw err;
   }
 }
-
 
 var databaseInit = async () => {
   global.harvest_dbstring = process.env.HARVEST_DATABASE_CONNECTION;
@@ -45,19 +42,33 @@ var mqInit = async () => {
   return;
 };
 
-var azureInit = async () => {
 
-  global.AzureKey = process.env.AZUREKEY;
-  global.AzureCoolKey = process.env.AZURECOOLKEY;
-  global.AzureCoolBucket = process.env.AZURECOOLBUCKET;
-  global.AzureCoolStorageAccount = process.env.AZURECOOLSTORAGEACCOUNT;
+var azureStorageInit =  () => {
+  const AzureBlobWrapper = require('../libs/AzureBlobWrapper');
+  
+  const azureCoolStorageAccount = process.env.AZURECOOLSTORAGEACCOUNT;
+  const azureCoolKey = process.env.AZURECOOLKEY;
+  global.AzureCoolContainer = process.env.AZURECOOLCONTAINER;
 
-  global.AzureDownload = new AzureImageRetriever();
-  global.AzureUpload = new AzureBlobSaver();
-  console.info("AZURE Clients Inititialized");
+  global.azureCool = new AzureBlobWrapper(azureCoolStorageAccount,azureCoolKey);
+  
+  console.info("AZURE Storage Client Inititialized");
 }
 
+azureImageInit = ()=>{
+  const AzureBlobWrapper = require('../libs/AzureBlobWrapper');
+  const SteelgateImages = require('../libs/SteelgateImages');
+  
+  const azureImageStorageAccount = process.env.AZURECOOLSTORAGEACCOUNT;
+  const azureImageKey = process.env.AZUREKEY;
+ 
+  global.AzureImageGeneralContainer = process.env.AZUREGENERALIMAGECONTAINER;
+  
+  global.azureImage = new AzureBlobWrapper(azureImageStorageAccount,azureImageKey);
+  global.steelgateImages = new SteelgateImages();
 
+  console.info("AZURE Image Client Inititialized");
+}
 
 
 var awsInit = async () => {
@@ -73,13 +84,13 @@ var appInit = async () => {
   if (!global.config) {
     global.config = {};
   }
-
   global.config.log_location = process.env.LOG_LOCATION || "file";
   global.config.log_location = global.config.log_location.toLowerCase();
   global.config.result_directory = __dirname + "/../results/";
+  global.config.tag_limit = process.env.TAG_LIMIT || 1000;
+  global.config.html_char_limit = process.env.HTML_CHAR_LIMIT || 2000000;
+
   global.html_analyzer = new HtmlAnalyzer();
-  global.config.tag_limit = process.env.TAG_LIMIT || 5000;
-  global.config.html_char_limit = process.env.HTML_CHAR_LIMIT || 50000000;
 
   console.info("General App Initialized");
 
@@ -88,7 +99,8 @@ var appInit = async () => {
 
 
 module.exports.globalInit = globalInit;
+module.exports.azureStorageInit = azureStorageInit;
+module.exports.azureImageInit = azureImageInit;
 module.exports.databaseInit = databaseInit;
-module.exports.azureInit = azureInit;
 module.exports.appInit = appInit;
 
