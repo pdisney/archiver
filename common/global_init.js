@@ -59,7 +59,7 @@ azureImageInit = ()=>{
   const AzureBlobWrapper = require('../libs/AzureBlobWrapper');
   const SteelgateImages = require('../libs/SteelgateImages');
   
-  const azureImageStorageAccount = process.env.AZURECOOLSTORAGEACCOUNT;
+  const azureImageStorageAccount = process.env.AZUREIMAGESTORAGEACCOUNT;
   const azureImageKey = process.env.AZUREKEY;
  
   global.AzureImageGeneralContainer = process.env.AZUREGENERALIMAGECONTAINER;
