@@ -22,32 +22,31 @@ class PostgresqlConnector {
     }
 
     query(query, values) {
-        return new Promise((resolve, reject) => {
-            if (!values) {
-                values = [];
-            }
-            this.pool.connect().then(client => {
-                return client.query(query, values).then(res => {
-                    client.release();
-                    var rows = [];
-
-                    if (res.rows) {
-                        rows = res.rows;
+        return (
+            async () => {
+                try {
+                    if (!values) {
+                        values = [];
                     }
-                    return resolve(rows);
-                }).catch(err => {
-                    client.release();
+                    const { rows } = await this.pool.query(query, values)
+                    return rows;
+                } catch (err) {
                     query = query.substring(0, 1000);
                     console.error('Error in Query', query, values);
                     console.error(err);
-                    return reject(err);
-                });
-            }).catch(err => {
-                console.error("Offending Query", query , values);
-                console.error(err);
-                return reject(err);
-            });
-        });
+                    throw err;
+                }
+            }
+        )();
+    }
+
+
+    shutdown() {
+        return (
+            async () => {
+                await this.pool.end();
+            }
+        )()
     }
 
 

@@ -127,29 +127,21 @@ describe('AzureBlobRetriever test', function () {
     it('Test AzureBlobWrapper getBlob', async function () {
       await globalinit.azureStorageInit();
   
-      var output = await global.azureCool.getBlob(global.AzureCoolContainer, "www.naturallysource.com/www.naturallysource.com_2017-08-25_1553265851688_images.json");
+      var output = await global.azureCool.getBlob(global.AzureCoolContainer, 'sildenafilaurochem.net/sildenafilaurochem.net_2017-12-15_1553533782064.json');// "www.naturallysource.com/www.naturallysource.com_2017-08-25_1553265851688_images.json");
       output = JSON.parse(output);
-  
-  
-      var length = output.images.length;
-  
-      for (var i = 0; i < length; i++) {
-        var img = output.images[i];
-        var p = __dirname + '/image_' + i + '.png';
-        var buff = Buffer.from(img.image, img.encoding);
-        await writeFile(p, buff);
-      }
-  
-  
+      
+      expect(output.url).to.be.eql('http://sildenafilaurochem.net/solutions-center/virecta-dzialanie-abra-100-safe.html');
+     
     });
   
   
 
   it('Test AzureBlobWrapper getBlobsByPrefix', async function () {
+    try{
     await globalinit.azureStorageInit();
-    var prefix =  'canadadrugs'
+    var prefix ='canadadrugs';
 
-    var blobs = await global.azureCool.getBlobsByPrefix(global.AzureCoolContainer, prefix, 10);
+    var blobs = await global.azureCool.getBlobsByPrefix(global.AzureCoolContainer, prefix, 500);
    
     var images = [];
     for (var i = 0; i < blobs.length; i++) {
@@ -164,6 +156,7 @@ describe('AzureBlobRetriever test', function () {
     }
 
      var length = images.length;
+     console.info("Downloading images");
  
      for (var i = 0; i < length; i++) {
        var img = images[i];
@@ -173,6 +166,9 @@ describe('AzureBlobRetriever test', function () {
      }
 
      expect(blobs.length).to.be.eql(10);
+    }catch(err){
+      console.log(err);
+    }
   });
 
 
