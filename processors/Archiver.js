@@ -70,8 +70,6 @@ class Archiver {
     generateHarvestArchive() {
         return (async () => {
             try {
-                var rabbitpublisher = new RabbitPublisher(global.mq_connector);
-
                 var offset = await getOffset('hv', '');
 
                 var query = "SELECT id FROM harvests ORDER BY id"
